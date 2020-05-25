@@ -1,0 +1,66 @@
+[submodule "jellyfin-plugin-template"]
+	path = jellyfin-plugin-template
+	url = https://github.com/jellyfin/jellyfin-plugin-template
+[submodule "jellyfin-plugin-anime"]
+	path = jellyfin-plugin-anime
+	url = https://github.com/jellyfin/jellyfin-plugin-anime
+[submodule "jellyfin-plugin-autoorganize"]
+	path = jellyfin-plugin-autoorganize
+	url = https://github.com/jellyfin/jellyfin-plugin-autoorganize
+[submodule "jellyfin-plugin-trakt"]
+	path = jellyfin-plugin-trakt
+	url = https://github.com/jellyfin/jellyfin-plugin-trakt
+[submodule "jellyfin-plugin-ldapauth"]
+	path = jellyfin-plugin-ldapauth
+	url = https://github.com/jellyfin/jellyfin-plugin-ldapauth
+[submodule "jellyfin-plugin-iptv"]
+	path = jellyfin-plugin-iptv
+	url = https://github.com/jellyfin/jellyfin-plugin-iptv
+[submodule "jellyfin-plugin-reports"]
+	path = jellyfin-plugin-reports
+	url = https://github.com/jellyfin/jellyfin-plugin-reports
+[submodule "jellyfin-plugin-bookshelf"]
+	path = jellyfin-plugin-bookshelf
+	url = https://github.com/jellyfin/jellyfin-plugin-bookshelf
+[submodule "jellyfin-plugin-opensubtitles"]
+	path = jellyfin-plugin-opensubtitles
+	url = https://github.com/jellyfin/jellyfin-plugin-opensubtitles
+[submodule "jellyfin-plugin-tvheadend"]
+	path = jellyfin-plugin-tvheadend
+	url = https://github.com/jellyfin/jellyfin-plugin-tvheadend
+[submodule "jellyfin-plugin-playbackreporting"]
+	path = jellyfin-plugin-playbackreporting
+	url = https://github.com/jellyfin/jellyfin-plugin-playbackreporting
+[submodule "jellyfin-plugin-tmdbboxsets"]
+	path = jellyfin-plugin-tmdbboxsets
+	url = https://github.com/jellyfin/jellyfin-plugin-tmdbboxsets
+[submodule "jellyfin-plugin-pushbullet"]
+	path = jellyfin-plugin-pushbullet
+	url = https://github.com/jellyfin/jellyfin-plugin-pushbullet
+[submodule "jellyfin-plugin-gotify"]
+	path = jellyfin-plugin-gotify
+	url = https://github.com/jellyfin/jellyfin-plugin-gotify
+[submodule "jellyfin-plugin-emailnotifications"]
+	path = jellyfin-plugin-emailnotifications
+	url = https://github.com/jellyfin/jellyfin-plugin-emailnotifications
+[submodule "jellyfin-plugin-slack"]
+	path = jellyfin-plugin-slack
+	url = https://github.com/jellyfin/jellyfin-plugin-slack
+[submodule "jellyfin-plugin-fanart"]
+	path = jellyfin-plugin-fanart
+	url = https://github.com/jellyfin/jellyfin-plugin-fanart
+[submodule "jellyfin-plugin-nextpvr"]
+	path = jellyfin-plugin-nextpvr
+	url = https://github.com/jellyfin/jellyfin-plugin-nextpvr
+[submodule "jellyfin-plugin-pushover"]
+	path = jellyfin-plugin-pushover
+	url = https://github.com/jellyfin/jellyfin-plugin-pushover
+[submodule "jellyfin-plugin-kodisyncqueue"]
+	path = jellyfin-plugin-kodisyncqueue
+	url = https://github.com/jellyfin/jellyfin-plugin-kodisyncqueue
+[submodule "jellyfin-plugin-serverwmc"]
+	path = jellyfin-plugin-serverwmc
+	url = https://github.com/jellyfin/jellyfin-plugin-serverwmc
+[submodule "jellyfin-plugin-isomounter"]
+	path = jellyfin-plugin-isomounter
+	url = https://github.com/jellyfin/jellyfin-plugin-isomounter
