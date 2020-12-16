@@ -27,17 +27,26 @@ The Jellyfin project provides a link:./release-drafter.yml[Global Configuration 
 [source,yml]
 ----
 _extends: jellyfin-meta-plugins
-#FIXME: if your plugin uses a more suphisticated versioning update this acordingly
+#OPTIONAL: if your plugin uses a more suphisticated versioning update this acordingly
 # name-template: Version $NEXT_MINOR_VERSION
 # tag-template: v$NEXT_MAJOR_VERSION
 # version-template: $MAJOR
+
+#FIXME: overwrite the template so that the you dont have to manually update the download links
+#       when releasing (see the example in the LDAP-Auth plugin mentioned above)
+# template: |
+#   <!-- Optional: add a release summary here -->
+#   <!-- FIXME: [Plugin build can be downloaded here](<url to version download>) -->
+#   
+#   ## :sparkles: What's New
+#   
+#   $CHANGES
 ----
 
 All global settings can be overridden in repositories.
 Or you can write your own configuration from scratch if needed.
 See the link:https://github.com/toolmantim/release-drafter/blob/master/README.md[Release Drafter Documentation] for guidelines.
 If a change you need is a common use-case for Jellyfin, it is recommended to submit a pull request to the link:./release-drafter.yml[Global Configuration file]
-
 
 ==== Global Configuration Notes
 
@@ -47,8 +56,10 @@ There are some considerations about the default configuration:
   Release Drafter defaults to link:https://semver.org/[semver], but the majority of Jellyfin plugins use only the major version number.
   We use it as a default in the global configuration, but it can be overridden (e.g. `version-template: $MAJOR.$MINOR.$PATCH`)
 * Next version number will be used by default as a next release name.
-  Another naming template can be defined by a `name-template` property, e.g. `name-template: My Plugin v$NEXT_PATCH_VERSION`
-
+  Another naming template can be defined by a `name-template` property. (e.g. `name-template: My Plugin v$NEXT_PATCH_VERSION`)
+* The `tag-template` is the template for the tag of the draft release, 
+  if you create a tag according to this template before releasing the draft it will be pre-selected for the release.
+  It also is templated in as the release tag if you creat a release from the draft manually, but can be overwritten. (e.g. `v$NEXT_PATCH_VERSION`)
 
 === Releasing a Plugin with Release Drafter
 

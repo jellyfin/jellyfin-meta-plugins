@@ -53,5 +53,9 @@ exclude-labels:
 
 template: |
   <!-- Optional: add a release summary here -->
-  [Plugin build can be downloaded here](https://repo.jellyfin.org/releases/plugin/ldap-authentication/ldap-authentication_$NEXT_MAJOR_VERSION.0.0.0.zip).
+  <!-- FIXME: [Plugin build can be downloaded here](<url to version download>) -->
+  
+  ## :sparkles: What's New
+  
   $CHANGES
+
