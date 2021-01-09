@@ -60,6 +60,9 @@ There are some considerations about the default configuration:
 * The `tag-template` is the template for the tag of the draft release, 
   if you create a tag according to this template before releasing the draft it will be pre-selected for the release.
   It also is templated in as the release tag if you creat a release from the draft manually, but can be overwritten. (e.g. `v$NEXT_PATCH_VERSION`)
+* Finally, the `template` property itself represents the Markdown body of the GitHub Release. 
+  It has a default value provided by the template found within this repo, but should bew overwritten based on this  template to include a download link.
+  (if you are unsure of what this means have a look at a plugin already using it e.g. link:https://github.com/jellyfin/jellyfin-plugin-ldapauth/blob/master/.github/release-drafter.yml[LDAP-Auth Plugin])
 
 === Releasing a Plugin with Release Drafter
 
