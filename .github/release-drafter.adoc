@@ -1,0 +1,89 @@
+[[release-drafter]]
+= Release Drafter
+:toc:
+:toc-placement: preamble
+:toclevels: 3
+
+link:https://github.com/toolmantim/release-drafter[Release Drafter] is a tool and GitHub app which helps to automate the management of releases notes.
+This tool generates changelog drafts using pull request metadata (commit headers, links, etc.) and then suggest a changelog draft in GitHub Releases.
+
+This page provides information about how to use it.
+
+== Usage
+
+Despite the availability of Release Drafter as a GitHub app it is preferred to use the GitHub Action approach.
+The reason behind this is that the GitHub app does not produce any logs which would be available to plugin maintainers,
+and hence make it more difficult to troubleshoot errors if they occur.
+
+=== Enabling Release Drafter GitHub Action in a Repository
+
+Have a look to the sample configuration available in the link:https://github.com/jellyfin/jellyfin-plugin-ldapauth/blob/master/.github/workflows/update-release-draft.yml[LDAP-Auth Plugin].
+
+=== Configuring Release Drafter
+
+After enabling RD, it needs to be configured in `.github/release-drafter.yml` in the master branch of your repository.
+The Jellyfin project provides a link:./release-drafter.yml[Global Configuration file], so a minimal configuration looks like this one:
+
+[source,yml]
+----
+_extends: jellyfin-meta-plugins
+#OPTIONAL: if your plugin uses a more suphisticated versioning update this acordingly
+# name-template: Version $NEXT_MINOR_VERSION
+# tag-template: v$NEXT_MAJOR_VERSION
+# version-template: $MAJOR
+
+#FIXME: overwrite the template so that the you dont have to manually update the download links
+#       when releasing (see the example in the LDAP-Auth plugin mentioned above)
+# template: |
+#   <!-- Optional: add a release summary here -->
+#   <!-- FIXME: [Plugin build can be downloaded here](<url to version download>) -->
+#   
+#   ## :sparkles: What's New
+#   
+#   $CHANGES
+----
+
+All global settings can be overridden in repositories.
+Or you can write your own configuration from scratch if needed.
+See the link:https://github.com/toolmantim/release-drafter/blob/master/README.md[Release Drafter Documentation] for guidelines.
+If a change you need is a common use-case for Jellyfin, it is recommended to submit a pull request to the link:./release-drafter.yml[Global Configuration file]
+
+==== Global Configuration Notes
+
+There are some considerations about the default configuration:
+
+* Jellyfin plugins can use different versioning formats.
+  Release Drafter defaults to link:https://semver.org/[semver], but the majority of Jellyfin plugins use only the major version number.
+  We use it as a default in the global configuration, but it can be overridden (e.g. `version-template: $MAJOR.$MINOR.$PATCH`)
+* Next version number will be used by default as a next release name.
+  Another naming template can be defined by a `name-template` property. (e.g. `name-template: My Plugin v$NEXT_PATCH_VERSION`)
+* The `tag-template` is the template for the tag of the draft release, 
+  if you create a tag according to this template before releasing the draft it will be pre-selected for the release.
+  It also is templated in as the release tag if you creat a release from the draft manually, but can be overwritten. (e.g. `v$NEXT_PATCH_VERSION`)
+* Finally, the `template` property itself represents the Markdown body of the GitHub Release. 
+  It has a default value provided by the template found within this repo, but should bew overwritten based on this  template to include a download link.
+  (if you are unsure of what this means have a look at a plugin already using it e.g. link:https://github.com/jellyfin/jellyfin-plugin-ldapauth/blob/master/.github/release-drafter.yml[LDAP-Auth Plugin])
+
+=== Releasing a Plugin with Release Drafter
+
+1. Make sure that all pull requests in the release are properly labeled.
+   See the link:./release-drafter.yml[Global Configuration file] for available labels
+2. (optional) crate a git tag locally and push it to your plugin repo
+3. Go to `${YOUR_REPO}/releases` and click "Edit" on the draft release.
+4. Edit the tag, point it to a tag or a release commit created by the common release flow
+** Tags represent a text field with auto-completion. Tag names can be also copy-pasted from `${YOUR_REPO}/tags`
+** Recent commits can be selected from a dropdown
+** (optional) if you pushed a tag manually you should see the text *Existing tag*
+5. Edit the release name, if needed
+6. Review and copy-edit the changelog
+** First release draft will likely contain all history from the beginning of the repository,
+   you will need to remove entries corresponding to PRs included in prior releases.
+   If all new PRs are categorized, just delete everything before the first header.
+** Release drafter is designed to add one entry per pull request.
+   If a pull request includes multiple changes to be noted, manual editing will be needed
+7. Click the _Publish_ button
+
+== Links
+
+* link:https://github.com/toolmantim/release-drafter/blob/master/README.md[Release Drafter Documentation]
+* link:https://github.com/jenkinsci/.github/blob/master/.github/release-drafter.adoc[Reference used for this Readme]
