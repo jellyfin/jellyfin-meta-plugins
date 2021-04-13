@@ -105,3 +105,4 @@ if removed:
         commit_message.append("- {}".format(plugin))
 
 subprocess.run(["git", "commit", "-m", "\n".join(commit_message)])
+subprocess.run(["git", "submodule", "update", "--init"])
