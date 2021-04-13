@@ -1,9 +1,6 @@
 [submodule "jellyfin-plugin-template"]
 	path = jellyfin-plugin-template
 	url = https://github.com/jellyfin/jellyfin-plugin-template
-[submodule "jellyfin-plugin-anime"]
-	path = jellyfin-plugin-anime
-	url = https://github.com/jellyfin/jellyfin-plugin-anime
 [submodule "jellyfin-plugin-autoorganize"]
 	path = jellyfin-plugin-autoorganize
 	url = https://github.com/jellyfin/jellyfin-plugin-autoorganize
@@ -13,9 +10,6 @@
 [submodule "jellyfin-plugin-ldapauth"]
 	path = jellyfin-plugin-ldapauth
 	url = https://github.com/jellyfin/jellyfin-plugin-ldapauth
-[submodule "jellyfin-plugin-iptv"]
-	path = jellyfin-plugin-iptv
-	url = https://github.com/jellyfin/jellyfin-plugin-iptv
 [submodule "jellyfin-plugin-reports"]
 	path = jellyfin-plugin-reports
 	url = https://github.com/jellyfin/jellyfin-plugin-reports
@@ -37,9 +31,6 @@
 [submodule "jellyfin-plugin-pushbullet"]
 	path = jellyfin-plugin-pushbullet
 	url = https://github.com/jellyfin/jellyfin-plugin-pushbullet
-[submodule "jellyfin-plugin-gotify"]
-	path = jellyfin-plugin-gotify
-	url = https://github.com/jellyfin/jellyfin-plugin-gotify
 [submodule "jellyfin-plugin-emailnotifications"]
 	path = jellyfin-plugin-emailnotifications
 	url = https://github.com/jellyfin/jellyfin-plugin-emailnotifications
@@ -52,15 +43,53 @@
 [submodule "jellyfin-plugin-nextpvr"]
 	path = jellyfin-plugin-nextpvr
 	url = https://github.com/jellyfin/jellyfin-plugin-nextpvr
-[submodule "jellyfin-plugin-pushover"]
-	path = jellyfin-plugin-pushover
-	url = https://github.com/jellyfin/jellyfin-plugin-pushover
 [submodule "jellyfin-plugin-kodisyncqueue"]
 	path = jellyfin-plugin-kodisyncqueue
 	url = https://github.com/jellyfin/jellyfin-plugin-kodisyncqueue
 [submodule "jellyfin-plugin-serverwmc"]
 	path = jellyfin-plugin-serverwmc
 	url = https://github.com/jellyfin/jellyfin-plugin-serverwmc
-[submodule "jellyfin-plugin-isomounter"]
-	path = jellyfin-plugin-isomounter
-	url = https://github.com/jellyfin/jellyfin-plugin-isomounter
+[submodule "jellyfin-plugin-artwork"]
+	path = jellyfin-plugin-artwork
+	url = https://github.com/jellyfin/jellyfin-plugin-artwork.git
+	branch = master
+[submodule "jellyfin-plugin-anisearch"]
+	path = jellyfin-plugin-anisearch
+	url = https://github.com/jellyfin/jellyfin-plugin-anisearch.git
+	branch = master
+[submodule "jellyfin-plugin-anilist"]
+	path = jellyfin-plugin-anilist
+	url = https://github.com/jellyfin/jellyfin-plugin-anilist.git
+	branch = master
+[submodule "jellyfin-plugin-anidb"]
+	path = jellyfin-plugin-anidb
+	url = https://github.com/jellyfin/jellyfin-plugin-anidb.git
+	branch = master
+[submodule "jellyfin-plugin-kitsu"]
+	path = jellyfin-plugin-kitsu
+	url = https://github.com/jellyfin/jellyfin-plugin-kitsu.git
+	branch = master
+[submodule "jellyfin-plugin-musicbrainz"]
+	path = jellyfin-plugin-musicbrainz
+	url = https://github.com/jellyfin/jellyfin-plugin-musicbrainz.git
+	branch = master
+[submodule "jellyfin-plugin-omdb"]
+	path = jellyfin-plugin-omdb
+	url = https://github.com/jellyfin/jellyfin-plugin-omdb.git
+	branch = master
+[submodule "jellyfin-plugin-tmdb"]
+	path = jellyfin-plugin-tmdb
+	url = https://github.com/jellyfin/jellyfin-plugin-tmdb.git
+	branch = master
+[submodule "jellyfin-plugin-tvmaze"]
+	path = jellyfin-plugin-tvmaze
+	url = https://github.com/jellyfin/jellyfin-plugin-tvmaze.git
+	branch = master
+[submodule "jellyfin-plugin-tvdb"]
+	path = jellyfin-plugin-tvdb
+	url = https://github.com/jellyfin/jellyfin-plugin-tvdb.git
+	branch = master
+[submodule "jellyfin-plugin-coverartarchive"]
+	path = jellyfin-plugin-coverartarchive
+	url = https://github.com/jellyfin/jellyfin-plugin-coverartarchive.git
+	branch = master
