@@ -27,6 +27,7 @@ def update(_name, url=None):
 
     subprocess.run(["git", "fetch", "--all", "--tags"], cwd=_name, check=True)
     subprocess.run(["git", "checkout", "-f", "-B", "master", "origin/master"], cwd=_name, check=True)
+    subprocess.run(["git", "add", _name], check=True)
     fetched.append(_name)
 
 
