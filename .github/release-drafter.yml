@@ -55,11 +55,32 @@ exclude-labels:
   - skip-changelog
   - invalid
 
-template: |
+autolabeler:
+  - label: 'ci'
+    files:
+      - '.github/workflows/*'
+      - '.github/dependabot.yml'
+    branch:
+      - '(/ci){0,1}\/.+/'
+  - label: 'documentation'
+    files:
+      - '*.md'
+    branch:
+      - '(/docs){0,1}\/.+/'
+  - label: 'bugfix'
+    branch:
+      - '/fix\/.+/'
+    title:
+      - '/fix/i'
+  - label: 'feature'
+    branch:
+      - '/feature\/.+/'
+
+template: |-
   <!-- Optional: add a release summary here -->
   <!-- FIXME: [Plugin build can be downloaded here](<url to version download>) -->
-  
+
   ## :sparkles: What's New
-  
+
   $CHANGES
 
