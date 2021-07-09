@@ -1,52 +1,55 @@
 # Configuration for Release Drafter: https://github.com/toolmantim/release-drafter
-name-template: "Version $NEXT_MAJOR_VERSION"
+name-template: 'Version $NEXT_MAJOR_VERSION'
 # Most plugins within the Jellyfin Org uses a single-digit versioning. Can be replaced by semver: $MAJOR.$MINOR.$PATCH
 # https://github.com/release-drafter/release-drafter#next-version-variables
-tag-template: "v$NEXT_MAJOR_VERSION"
-version-template: "$MAJOR"
-category-template: "### $TITLE"
+tag-template: 'v$NEXT_MAJOR_VERSION'
+version-template: '$MAJOR'
+category-template: '### $TITLE'
 
 # Emoji reference: https://gitmoji.carloscuesta.me/
 categories:
-  - title: ":boom: Breaking changes"
+  - title: ':boom: Breaking changes'
     labels:
       - breaking
-  - title: ":fire: Removed"
+  - title: ':fire: Removed'
     labels:
       - removed
-  - title: ":rewind: Reverted Changes"
+  - title: ':rewind: Reverted Changes'
     labels:
       - revert
       - reverted
-  - title: ":rocket: Major features and improvements"
+  - title: ':rocket: Major features and improvements'
     labels:
       - major-enhancement
-  - title: ":ambulance: Major bug fixes"
+  - title: ':ambulance: Major bug fixes'
     labels:
       - major-bug
-  - title: ":wastebasket:️ Deprecated"
+  - title: ':wastebasket:️ Deprecated'
     label: deprecated
-  - title: ":tada: New features and improvements"
+  - title: ':tada: New features and improvements'
     labels:
       - enhancement
       - feature
-  - title: ":bug: Bug Fixes"
+  - title: ':bug: Bug Fixes'
     labels:
       - bug
       - fix
       - bugfix
       - regression
-  - title: ":arrow_up: Dependency updates"
+  - title: ':arrow_up: Dependency updates'
     labels:
       - dependencies # Default label used by Dependabot
-  - title: ":construction_worker: CI & build changes"
+  - title: ':construction_worker: CI & build changes'
     labels:
       - ci
       - build
-  - title: ":memo: Documentation updates"
+  - title: ':gear: Code or Repo Maintenance'
+    labels:
+      - chore
+  - title: ':memo: Documentation updates'
     labels:
       - documentation
-  - title: ":white_check_mark: Tests"
+  - title: ':white_check_mark: Tests'
     labels:
       - test
       - tests
@@ -56,23 +59,28 @@ exclude-labels:
   - invalid
 
 autolabeler:
-  - label: 'ci'
+  - label: ci
     files:
       - '.github/workflows/*'
       - '.github/dependabot.yml'
     branch:
-      - '(/ci){0,1}\/.+/'
-  - label: 'documentation'
+      - '/ci\/.+/'
+  - label: documentation
     files:
       - '*.md'
     branch:
-      - '(/docs){0,1}\/.+/'
-  - label: 'bugfix'
+      - '/docs?\/.+/'
+  - label: bug
     branch:
       - '/fix\/.+/'
     title:
       - '/fix/i'
-  - label: 'feature'
+  - label: chore
+    branch:
+      - '/chore\/.+/'
+    title:
+      - '/chore/i'
+  - label: feature
     branch:
       - '/feature\/.+/'
 
