@@ -99,6 +99,10 @@
   color: 'd876e3'
   description: This Issue contains a question
 
+- name: blocked
+  color: '8e0900'
+  description: This PR is blocked due to a commented reason
+
 - name: chore
   color: '36566F'
   description: This PR contains repository maintenance changes
