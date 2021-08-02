@@ -39,6 +39,7 @@ categories:
   - title: ':arrow_up: Dependency updates'
     labels:
       - dependencies # Default label used by Dependabot
+      - dependency
   - title: ':construction_worker: CI & build changes'
     labels:
       - ci
