@@ -107,7 +107,7 @@
   color: '36566F'
   description: This PR contains repository maintenance changes
 
-- name: dependencies
+- name: dependency
   color: '1D76DB'
   description: This PR updates or changes a dependency file
 
