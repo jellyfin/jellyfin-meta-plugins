@@ -85,3 +85,7 @@
 	path = jellyfin-plugin-webhook
 	url = https://github.com/jellyfin/jellyfin-plugin-webhook.git
 	branch = master
+[submodule "jellyfin-plugin-opds"]
+	path = jellyfin-plugin-opds
+	url = https://github.com/jellyfin/jellyfin-plugin-opds.git
+	branch = master
