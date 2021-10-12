@@ -48,6 +48,7 @@ categories:
   - title: ':gear: Code or Repo Maintenance'
     labels:
       - chore
+      - cleanup
   - title: ':memo: Documentation updates'
     labels:
       - documentation
