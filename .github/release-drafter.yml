@@ -37,6 +37,17 @@ categories:
       - fix
       - bugfix
       - regression
+  - title: ':white_check_mark: Tests'
+    labels:
+      - test
+      - tests
+  - title: ':gear: Code or Repo Maintenance'
+    labels:
+      - chore
+      - cleanup
+  - title: ':memo: Documentation updates'
+    labels:
+      - documentation
   - title: ':arrow_up: Dependency updates'
     labels:
       - dependencies # Default label used by Dependabot
@@ -45,17 +56,6 @@ categories:
     labels:
       - ci
       - build
-  - title: ':gear: Code or Repo Maintenance'
-    labels:
-      - chore
-      - cleanup
-  - title: ':memo: Documentation updates'
-    labels:
-      - documentation
-  - title: ':white_check_mark: Tests'
-    labels:
-      - test
-      - tests
 exclude-labels:
   - no-changelog
   - skip-changelog
