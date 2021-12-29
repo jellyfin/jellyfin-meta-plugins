@@ -1,6 +1,3 @@
-# Allows for the definition of PR and Issue /commands
-name: '📟 Slash Command Dispatcher'
-
 on:
   workflow_call:
     secrets:

@@ -1,5 +1,3 @@
-name: '🔀 PR Rebase Command'
-
 on:
   workflow_call:
     inputs:

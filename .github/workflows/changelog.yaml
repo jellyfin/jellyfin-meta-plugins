@@ -1,5 +1,3 @@
-name: '📝 Create/Update Release Draft & Release Bump PR'
-
 on:
   workflow_call:
     inputs:
