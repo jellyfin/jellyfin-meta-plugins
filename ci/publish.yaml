@@ -1,0 +1,68 @@
+name: '🚀 Publish Plugin'
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      isUnstable:
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Build Jellyfin Plugin
+        uses: oddstr13/jellyfin-plugin-repository-manager@v0.4.2
+        id: jprm
+        with:
+          dotnet-target: net6.0
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-artifact
+          retention-days: 30
+          if-no-files-found: error
+          path: ${{ steps.jprm.outputs.artifact }}
+
+  # TODO: finish up upload logic and align with repo server owner
+  upload:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upload Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: build-artifact
+
+      - name: Prepare GH Release Assets
+        run: |-
+          ehco '...'
+
+      - name: Upload GH Release Assets
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.release-drafter.outputs.upload_url }}
+          asset_path: ./*
+
+      - name: Upload Jellyfin Plugin Repository Assets
+
+  publish:
+    needs:
+      - upload
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Plugin Manifest

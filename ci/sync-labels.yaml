@@ -1,0 +1,17 @@
+name: '🔄 Sync labels'
+on:
+  workflow_call:
+    secrets:
+      token:
+        required: true
+
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: EndBug/label-sync@v2
+        with:
+          config-file: https://raw.githubusercontent.com/jellyfin/jellyfin-meta-plugins/master/.github/plugin-repo-labels.yaml
+          delete-other-labels: true
+          token: ${{ secrets.token }}

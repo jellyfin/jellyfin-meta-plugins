@@ -1,0 +1,22 @@
+# Allows for the definition of PR and Issue /commands
+name: '📟 Slash Command Dispatcher'
+
+on:
+  workflow_call:
+    secrets:
+      token:
+        required: true
+
+jobs:
+  launcher:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Command Dispatch
+        uses: peter-evans/slash-command-dispatch@v2
+        with:
+          token: ${{ secrets.token }}
+          permission: write
+          issue-type: pull-request
+          commands: |-
+            rebase
+            update-prep
