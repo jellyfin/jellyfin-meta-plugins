@@ -12,6 +12,7 @@ jobs:
         uses: peter-evans/slash-command-dispatch@v2
         with:
           token: ${{ secrets.token }}
+          reaction-token: ${{ secrets.token }}
           permission: write
           issue-type: pull-request
           commands: |-
