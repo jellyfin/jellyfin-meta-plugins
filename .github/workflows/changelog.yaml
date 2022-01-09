@@ -24,7 +24,7 @@ jobs:
       - name: Setup YQ
         uses: chrisdickinson/setup-yq@latest
         with:
-          yq-version: v4.14.2
+          yq-version: v4.16.2
 
       - name: Set-up Environment
         run: |-
@@ -69,7 +69,7 @@ jobs:
           pr_title: Prepare for release ${{ steps.draft.outputs.tag_name }}
           pr_source: prepare-${{ env.VERSION }}
           pr_labels: 'release-prep,skip-changelog'
-          pr_body: |
+          pr_body: |-
             :robot: This is a generated PR to update version and changelog in `build.yaml`.
             ---
             ${{ env.CHANGELOG }}
