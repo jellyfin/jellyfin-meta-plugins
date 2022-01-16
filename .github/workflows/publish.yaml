@@ -73,9 +73,9 @@ jobs:
           switches: -vrptz
           path: ./*.zip
           remote_path: /srv/repository/incoming/plugin/{{ github.repository }}/${{ inputs.version }}
-          remote_host: ${{ secrets.DEPLOY_HOST }}
-          remote_user: ${{ secrets.DEPLOY_USER }}
-          remote_key: ${{ secrets.DEPLOY_KEY }}
+          remote_host: ${{ secrets.deploy-host }}
+          remote_user: ${{ secrets.deploy-user }}
+          remote_key: ${{ secrets.deploy-key }}
 
   publish:
     needs:
@@ -88,9 +88,9 @@ jobs:
       - name: Update Plugin Manifest
         uses: appleboy/ssh-action@v0.1.4
         with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
+          host: ${{ secrets.deploy-host }}
+          username: ${{ secrets.deploy-user }}
+          key: ${{ secrets.deploy-key }}
           script_stop: true
           envs: JELLYFIN_REPO,JELLYFIN_REPO_URL
           script: |-
