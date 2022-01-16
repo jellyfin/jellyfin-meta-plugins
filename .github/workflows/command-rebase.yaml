@@ -19,14 +19,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Rebase PR
-        uses: peter-evans/rebase@v1
+        uses: peter-evans/rebase@v1.3.0
         id: rebase
         with:
           head: ${{ inputs.rebase-head }}
 
       - name: Add Success Reaction
         if: ${{ steps.rebase.outputs.rebased-count == 1 }}
-        uses: peter-evans/create-or-update-comment@v1
+        uses: peter-evans/create-or-update-comment@v1.4.5
         with:
           token: ${{ secrets.token }}
           repository: ${{ inputs.repository-full-name }}
@@ -35,7 +35,7 @@ jobs:
 
       - name: Add Failure Reaction
         if: ${{ steps.rebase.outputs.rebased-count == 0 || failure() }}
-        uses: peter-evans/create-or-update-comment@v1
+        uses: peter-evans/create-or-update-comment@v1.4.5
         with:
           token: ${{ secrets.token }}
           repository: ${{ inputs.repository-full-name }}

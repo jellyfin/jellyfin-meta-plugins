@@ -8,16 +8,24 @@ on:
         required: false
         default: false
         type: boolean
+    secrets:
+      deploy-host:
+        required: true
+      deploy-user:
+        required: true
+      deploy-key:
+        required: true
+
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.4.0
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v1.9.0
         with:
           dotnet-version: 6.0.x
 
@@ -28,7 +36,7 @@ jobs:
           dotnet-target: net6.0
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v2.3.1
         with:
           name: build-artifact
           retention-days: 30
@@ -41,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Upload Artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v2.1.0
         with:
           name: build-artifact
 
@@ -54,7 +62,7 @@ jobs:
           ls -l
 
       - name: Upload GH Release Assets
-        uses: shogo82148/actions-upload-release-asset@v1
+        uses: shogo82148/actions-upload-release-asset@v1.5.0
         with:
           upload_url: ${{ steps.release-drafter.outputs.upload_url }}
           asset_path: ./*

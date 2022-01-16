@@ -22,7 +22,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.token }}
 
       - name: Setup YQ
-        uses: chrisdickinson/setup-yq@latest
+        uses: chrisdickinson/setup-yq@v1.0.0
         with:
           yq-version: v4.16.2
 
@@ -42,7 +42,7 @@ jobs:
 
       - name: Checkout Repository
         if: ${{ env.HAS_CHANGES == 'true' }}
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.4.0
 
       - name: Update build.yaml
         if: ${{ env.HAS_CHANGES == 'true' }}
@@ -60,7 +60,7 @@ jobs:
 
       - name: Create or Update PR
         if: ${{ env.HAS_CHANGES == 'true' }}
-        uses: k3rnels-actions/pr-update@v1
+        uses: k3rnels-actions/pr-update@v1.1.0
         with:
           token: ${{ secrets.token }}
           pr_title: Prepare for release ${{ steps.draft.outputs.tag_name }}
