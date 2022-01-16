@@ -1,27 +1,23 @@
 {
-    "extends": [
-      "config:base"
-    ],
-    "labels": ["dependencies"],
-    "packageRules": [
-      {
-        "matchManagers": ["github-actions"],
-        "addLabels": ["github_actions"]
-      },
-      {
-        "matchManagers": ["npm"],
-        "addLabels": ["npm"]
-      },
-      {
-        "matchManagers": ["git-submodules"],
-        "addLabels": ["git-submodules"],
-        "automerge": true,
-        "automergeType": "branch"
-      }
-    ],
-    "git-submodules": {
-      "enabled": true
+  "extends": [
+    "config:base"
+  ],
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "addLabels": ["github_actions"]
     },
-    "timezone": "Etc/UTC",
-    "schedule": ["before 2am"]
-  }
+    {
+      "matchManagers": ["git-submodules"],
+      "addLabels": ["git-submodules"],
+      "automerge": true,
+      "automergeType": "branch"
+    }
+  ],
+  "git-submodules": {
+    "enabled": true
+  },
+  "timezone": "Etc/UTC",
+  "schedule": ["before 2am"]
+}
