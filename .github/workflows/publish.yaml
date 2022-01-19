@@ -69,6 +69,7 @@ jobs:
 
       - name: Upload Jellyfin Plugin Repository Assets
         uses: burnett01/rsync-deployments@5.2
+        if: ${{ contains(github.repository, 'jellyfin/') }}
         with:
           switches: -vrptz
           path: ./*.zip
@@ -81,6 +82,7 @@ jobs:
     needs:
       - upload
     runs-on: ubuntu-latest
+    if: ${{ contains(github.repository, 'jellyfin/') }}
     env:
       JELLYFIN_REPO: "/srv/repository/mirror/releases/plugin/manifest-stable.json"
       JELLYFIN_REPO_URL: "https://repo.jellyfin.org/releases/plugin/"
