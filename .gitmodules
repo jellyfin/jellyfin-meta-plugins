@@ -89,3 +89,11 @@
 	path = jellyfin-plugin-opds
 	url = https://github.com/jellyfin/jellyfin-plugin-opds.git
 	branch = master
+[submodule "jellyfin-plugin-sessioncleaner"]
+	path = jellyfin-plugin-sessioncleaner
+	url = https://github.com/jellyfin/jellyfin-plugin-sessioncleaner.git
+	branch = master
+[submodule "jellyfin-plugin-imvdb"]
+	path = jellyfin-plugin-imvdb
+	url = https://github.com/jellyfin/jellyfin-plugin-imvdb.git
+	branch = master
