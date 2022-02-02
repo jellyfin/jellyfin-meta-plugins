@@ -1,0 +1,43 @@
+on:
+  workflow_call:
+    inputs:
+      rebase-head:
+        required: true
+        type: string
+      repository-full-name:
+        required: true
+        type: string
+      comment-id:
+        required: true
+        type: string
+    secrets:
+      token:
+        required: true
+
+jobs:
+  rebase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Rebase PR
+        uses: peter-evans/rebase@v1.3.0
+        id: rebase
+        with:
+          head: ${{ inputs.rebase-head }}
+
+      - name: Add Success Reaction
+        if: ${{ steps.rebase.outputs.rebased-count == 1 }}
+        uses: peter-evans/create-or-update-comment@v1.4.5
+        with:
+          token: ${{ secrets.token }}
+          repository: ${{ inputs.repository-full-name }}
+          comment-id: ${{ inputs.comment-id }}
+          reaction-type: hooray
+
+      - name: Add Failure Reaction
+        if: ${{ steps.rebase.outputs.rebased-count == 0 || failure() }}
+        uses: peter-evans/create-or-update-comment@v1.4.5
+        with:
+          token: ${{ secrets.token }}
+          repository: ${{ inputs.repository-full-name }}
+          comment-id: ${{ inputs.comment-id }}
+          reaction-type: confused, -1

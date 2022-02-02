@@ -1,0 +1,55 @@
+on:
+  workflow_call:
+    inputs:
+      csproj-name:
+        required: true
+        type: string
+      csproj-folder:
+        required: false
+        type: string
+      is-unstable:
+        required: false
+        default: false
+        type: boolean
+
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    if: ${{ inputs.isUnstable }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2.4.0
+
+      - name: Setup YQ
+        uses: chrisdickinson/setup-yq@v1.0.0
+        with:
+          yq-version: v4.16.2
+
+      - name: Read current version
+        run: |-
+          echo "CURRENT_VERSION=$(yq eval '.version' build.yaml)"
+          echo "CURRENT_VERSION=$(yq eval '.version' build.yaml)" >> $GITHUB_ENV
+
+      - name: Set next version
+        run: |-
+          # ensure even a version in schema 'x.y.z.b' is supported, yet only inc and persists the 'x' value further
+          C_VERSION=${CURRENT_VERSION%%.*}
+          CS_PROJ_NAME="${{ inputs.cs-proj-name }}"
+          CS_PROJ_FOLDER="${{ inputs.cs-proj-folder }}"
+
+          export NEXT_VERSION=$(( ${C_VERSION} + 1 ))
+          echo "NEXT_VERSION=${NEXT_VERSION}"
+          echo "NEXT_VERSION=${NEXT_VERSION}" >> $GITHUB_ENV
+
+          yq eval '.version = env(NEXT_VERSION)' -i build.yaml
+          sed -i ${CS_PROJ_FOLDER:-$CS_PROJ_NAME}/${CS_PROJ_NAME}.csproj \
+            -e "s;<AssemblyVersion>.*</AssemblyVersion>;<AssemblyVersion>${NEXT_VERSION}.0.0.0</AssemblyVersion>;" \
+            -e "s;<FileVersion>.*</FileVersion>;<FileVersion>${NEXT_VERSION}.0.0.0</FileVersion>;"
+
+      - name: Commit bump
+        run: |-
+          git config user.name "jellyfin-bot"
+          git config user.email "team@jellyfin.org"
+          git commit -am "chore: prepare for next release (v${NEXT_VERSION})"
+          git push origin ${GITHUB_REF}

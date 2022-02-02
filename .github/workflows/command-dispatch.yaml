@@ -1,0 +1,20 @@
+on:
+  workflow_call:
+    secrets:
+      token:
+        required: true
+
+jobs:
+  launcher:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Command Dispatch
+        uses: peter-evans/slash-command-dispatch@v2.3.0
+        with:
+          token: ${{ secrets.token }}
+          reaction-token: ${{ secrets.token }}
+          permission: write
+          issue-type: pull-request
+          commands: |-
+            rebase
+            update-prep

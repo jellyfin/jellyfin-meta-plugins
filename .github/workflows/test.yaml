@@ -1,0 +1,23 @@
+on:
+  workflow_call:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2.4.0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1.9.0
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --no-restore --verbosity normal

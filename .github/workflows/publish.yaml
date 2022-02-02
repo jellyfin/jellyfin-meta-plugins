@@ -1,0 +1,117 @@
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      is-unstable:
+        required: false
+        default: false
+        type: boolean
+    secrets:
+      deploy-host:
+        required: true
+      deploy-user:
+        required: true
+      deploy-key:
+        required: true
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2.4.0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1.9.0
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Build Jellyfin Plugin
+        uses: oddstr13/jellyfin-plugin-repository-manager@v0.4.2
+        id: jprm
+        with:
+          dotnet-target: net6.0
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2.3.1
+        with:
+          name: build-artifact
+          retention-days: 30
+          if-no-files-found: error
+          path: ${{ steps.jprm.outputs.artifact }}
+
+  upload:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Upload Artifact
+        uses: actions/download-artifact@v2.1.0
+        with:
+          name: build-artifact
+
+      - name: Prepare GH Release Assets
+        run: |-
+          for file in ./*; do
+            md5sum ${file#./} >> ${file%.*}.md5
+            sha256sum ${file#./} >> ${file%.*}.sha256
+          done
+          ls -l
+
+      - name: Upload GH Release Assets
+        uses: shogo82148/actions-upload-release-asset@v1.5.0
+        with:
+          upload_url: ${{ steps.release-drafter.outputs.upload_url }}
+          asset_path: ./*
+
+      - name: Upload Jellyfin Plugin Repository Assets
+        uses: burnett01/rsync-deployments@5.2
+        if: ${{ contains(github.repository, 'jellyfin/') }}
+        with:
+          switches: -vrptz
+          path: ./*.zip
+          remote_path: /srv/repository/incoming/plugin/{{ github.repository }}/${{ inputs.version }}
+          remote_host: ${{ secrets.deploy-host }}
+          remote_user: ${{ secrets.deploy-user }}
+          remote_key: ${{ secrets.deploy-key }}
+
+  publish:
+    needs:
+      - upload
+    runs-on: ubuntu-latest
+    if: ${{ contains(github.repository, 'jellyfin/') }}
+    env:
+      JELLYFIN_REPO: "/srv/repository/mirror/releases/plugin/manifest-stable.json"
+      JELLYFIN_REPO_URL: "https://repo.jellyfin.org/releases/plugin/"
+    steps:
+      - name: Update Plugin Manifest
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.deploy-host }}
+          username: ${{ secrets.deploy-user }}
+          key: ${{ secrets.deploy-key }}
+          script_stop: true
+          envs: JELLYFIN_REPO,JELLYFIN_REPO_URL
+          script: |-
+            lock_file="/tmp/jprm.lock"
+            trap 'rm -f ${lock_file}; exit 0' SIGINT SIGTERM
+            pushd "/srv/repository/incoming/plugin/${{ github.repository }}/${{ inputs.version }}" || exit 1
+            retry=1
+            published='false'
+
+            while [[ retry -le 4 && "${published}" != "true" ]]; do
+                if [[ -e ${lock_file} ]]; then
+                    echo "Could not acquire JPRM lock! (attempt ${retry})"
+                    sleep 2
+                else
+                    touch ${lock_file}
+                    jprm --verbosity=debug repo add --url="${JELLYFIN_REPO_URL}" "${JELLYFIN_REPO}" "${ZIP_FILE}"
+                    published='true'
+                fi
+            done
+
+            popd || exit 1
+            # TODO: should this clean up the incoming folder?
