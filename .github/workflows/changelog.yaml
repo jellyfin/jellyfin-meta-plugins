@@ -4,6 +4,16 @@ on:
       repository-name:
         required: true
         type: string
+      commiter-name:
+        required: false
+        default: "jellyfin-bot"
+        description: "This param overwrites the version bump committing git user.name"
+        type: string
+      commiter-email:
+        required: false
+        default: "team@jellyfin.org"
+        description: "This param overwrites the version bump committing git user.email"
+        type: string
     secrets:
       token:
         required: true
@@ -52,8 +62,8 @@ jobs:
       - name: Commit Changes
         if: ${{ env.HAS_CHANGES == 'true' }}
         run: |-
-          git config user.name "jellyfin-bot"
-          git config user.email "team@jellyfin.org"
+          git config user.name "${{ inputs.commiter-name }}"
+          git config user.email "${{ inputs.commiter-email }}"
           git checkout -b prepare-${{ env.VERSION }}
           git commit -am "Bump version to ${{ env.VERSION }}"
           git push -f origin prepare-${{ env.VERSION }}

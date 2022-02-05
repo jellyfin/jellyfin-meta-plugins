@@ -4,6 +4,11 @@ on:
       repository-name:
         required: true
         type: string
+      dotnet-version:
+        required: false
+        default: "6.0.x"
+        description: "The .NET version to setup for the build"
+        type: string
 
 jobs:
   analyze:
@@ -23,7 +28,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1.9.0
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: "${{ inputs.dotnet-version }}"
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v1

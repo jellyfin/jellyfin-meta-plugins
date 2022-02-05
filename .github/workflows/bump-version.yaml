@@ -11,6 +11,16 @@ on:
         required: false
         default: false
         type: boolean
+      commiter-name:
+        required: false
+        default: "jellyfin-bot"
+        description: "This param overwrites the version bump committing git user.name"
+        type: string
+      commiter-email:
+        required: false
+        default: "team@jellyfin.org"
+        description: "This param overwrites the version bump committing git user.email"
+        type: string
 
 
 jobs:
@@ -49,7 +59,7 @@ jobs:
 
       - name: Commit bump
         run: |-
-          git config user.name "jellyfin-bot"
-          git config user.email "team@jellyfin.org"
+          git config user.name "${{ inputs.commiter-name }}"
+          git config user.email "${{ inputs.commiter-email }}"
           git commit -am "chore: prepare for next release (v${NEXT_VERSION})"
           git push origin ${GITHUB_REF}
