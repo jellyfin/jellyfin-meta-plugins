@@ -38,6 +38,8 @@ jobs:
 
       - name: Set-up Environment
         run: |-
+          TAG="${{ steps.draft.outputs.tag_name }}"
+          echo "VERSION=${TAG#v}" >> $GITHUB_ENV
           cat << EOF | grep -P '^([*-] |###)' > cl.md
           ${{ steps.draft.outputs.body }}
           EOF
