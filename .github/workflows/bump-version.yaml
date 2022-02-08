@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v2.4.0
 
       - name: Setup YQ
-        uses: chrisdickinson/setup-yq@v1.0.0
+        uses: chrisdickinson/setup-yq@v1.0.1
         with:
           yq-version: v4.16.2
 
