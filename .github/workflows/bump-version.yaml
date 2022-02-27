@@ -11,6 +11,11 @@ on:
         required: false
         default: false
         type: boolean
+      default-branch:
+        required: false
+        default: "master"
+        description: "The branch to commit the version bump to"
+        type: string
       commiter-name:
         required: false
         default: "jellyfin-bot"
@@ -62,4 +67,4 @@ jobs:
           git config user.name "${{ inputs.commiter-name }}"
           git config user.email "${{ inputs.commiter-email }}"
           git commit -am "chore: prepare for next release (v${NEXT_VERSION})"
-          git push origin ${GITHUB_REF}
+          git push origin "refs/heads/${{ inputs.default-branch }}"
