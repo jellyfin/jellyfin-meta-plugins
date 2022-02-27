@@ -58,7 +58,7 @@ jobs:
       - build
     runs-on: ubuntu-latest
     steps:
-      - name: Upload Artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v2.1.0
         with:
           name: build-artifact
@@ -70,6 +70,14 @@ jobs:
             sha256sum ${file#./} >> ${file%.*}.sha256
           done
           ls -l
+
+      - name: Update and Publish Release Draft
+        uses: release-drafter/release-drafter@v5.15.0
+        id: release-drafter
+        with:
+          publish: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload GH Release Assets
         uses: shogo82148/actions-upload-release-asset@v1.5.0
