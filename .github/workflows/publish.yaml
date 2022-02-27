@@ -91,7 +91,7 @@ jobs:
         with:
           switches: -vrptz
           path: ./*.zip
-          remote_path: /srv/repository/incoming/plugin/{{ github.repository }}/${{ inputs.version }}
+          remote_path: /srv/repository/incoming/plugin/${{ github.repository }}/${{ inputs.version }}
           remote_host: ${{ secrets.deploy-host }}
           remote_user: ${{ secrets.deploy-user }}
           remote_key: ${{ secrets.deploy-key }}
@@ -118,7 +118,7 @@ jobs:
             pushd "/srv/repository/incoming/plugin/${{ github.repository }}/${{ inputs.version }}" || exit 1
             (
                 flock -x 300
-                jprm --verbosity=debug repo add --url="${JELLYFIN_REPO_URL}" "${JELLYFIN_REPO}" "${ZIP_FILE}"
+                jprm --verbosity=debug repo add --url="${JELLYFIN_REPO_URL}" "${JELLYFIN_REPO}" ./*.zip || exit 1
             ) 300>${lockfile}
             popd || exit 1
             rm -r "/srv/repository/incoming/plugin/${{ github.repository }}/${{ inputs.version }}" || exit 1
