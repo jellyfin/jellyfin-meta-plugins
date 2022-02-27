@@ -114,22 +114,11 @@ jobs:
           script_stop: true
           envs: JELLYFIN_REPO,JELLYFIN_REPO_URL
           script: |-
-            lock_file="/tmp/jprm.lock"
-            trap 'rm -f ${lock_file}; exit 0' SIGINT SIGTERM
+            lockfile="/run/lock/jprm.lock"
             pushd "/srv/repository/incoming/plugin/${{ github.repository }}/${{ inputs.version }}" || exit 1
-            retry=1
-            published='false'
-
-            while [[ retry -le 4 && "${published}" != "true" ]]; do
-                if [[ -e ${lock_file} ]]; then
-                    echo "Could not acquire JPRM lock! (attempt ${retry})"
-                    sleep 2
-                else
-                    touch ${lock_file}
-                    jprm --verbosity=debug repo add --url="${JELLYFIN_REPO_URL}" "${JELLYFIN_REPO}" "${ZIP_FILE}"
-                    published='true'
-                fi
-            done
-
+            (
+                flock -x 300
+                jprm --verbosity=debug repo add --url="${JELLYFIN_REPO_URL}" "${JELLYFIN_REPO}" "${ZIP_FILE}"
+            ) 300>${lockfile}
             popd || exit 1
-            # TODO: should this clean up the incoming folder?
+            rm -r "/srv/repository/incoming/plugin/${{ github.repository }}/${{ inputs.version }}" || exit 1
