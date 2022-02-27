@@ -26,7 +26,7 @@ on:
 jobs:
   bump-version:
     runs-on: ubuntu-latest
-    if: ${{ inputs.isUnstable }}
+    if: ${{ ! inputs.isUnstable }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2.4.0
