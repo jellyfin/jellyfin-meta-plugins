@@ -1,9 +1,6 @@
 [submodule "jellyfin-plugin-template"]
 	path = jellyfin-plugin-template
 	url = https://github.com/jellyfin/jellyfin-plugin-template
-[submodule "jellyfin-plugin-autoorganize"]
-	path = jellyfin-plugin-autoorganize
-	url = https://github.com/jellyfin/jellyfin-plugin-autoorganize
 [submodule "jellyfin-plugin-trakt"]
 	path = jellyfin-plugin-trakt
 	url = https://github.com/jellyfin/jellyfin-plugin-trakt
@@ -96,4 +93,12 @@
 [submodule "jellyfin-plugin-imvdb"]
 	path = jellyfin-plugin-imvdb
 	url = https://github.com/jellyfin/jellyfin-plugin-imvdb.git
+	branch = master
+[submodule "jellyfin-plugin-simkl"]
+	path = jellyfin-plugin-simkl
+	url = https://github.com/jellyfin/jellyfin-plugin-simkl.git
+	branch = master
+[submodule "jellyfin-plugin-vgmdb"]
+	path = jellyfin-plugin-vgmdb
+	url = https://github.com/jellyfin/jellyfin-plugin-vgmdb.git
 	branch = master
