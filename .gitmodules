@@ -102,3 +102,7 @@
 	path = jellyfin-plugin-vgmdb
 	url = https://github.com/jellyfin/jellyfin-plugin-vgmdb.git
 	branch = master
+[submodule "jellyfin-plugin-id3"]
+	path = jellyfin-plugin-id3
+	url = https://github.com/jellyfin/jellyfin-plugin-id3.git
+	branch = master
