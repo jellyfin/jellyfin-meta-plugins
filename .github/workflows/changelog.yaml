@@ -31,11 +31,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.token }}
 
-      - name: Setup YQ
-        uses: chrisdickinson/setup-yq@v1.0.1
-        with:
-          yq-version: v4.16.2
-
       - name: Set-up Environment
         run: |-
           TAG="${{ steps.draft.outputs.tag_name }}"
