@@ -1,3 +1,5 @@
+# DEPRECATED: Please use / rely on the changelog workflow as that works with protected branches
+
 on:
   workflow_call:
     inputs:

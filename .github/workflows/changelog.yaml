@@ -26,7 +26,7 @@ jobs:
     steps:
       # Drafts your next Release notes as Pull Requests are merged into "master"
       - name: Update Draft
-        uses: release-drafter/release-drafter@v5.16.1
+        uses: release-drafter/release-drafter@v5.19.0
         id: draft
         env:
           GITHUB_TOKEN: ${{ secrets.token }}
@@ -59,7 +59,16 @@ jobs:
       - name: Update build.yaml
         if: ${{ env.HAS_CHANGES == 'true' }}
         run: |-
-          yq eval '.targetAbi = env(ABI_VERSION) | .changelog = strenv(CHANGELOG) | .changelog style="literal"' -i build.yaml
+          if [[ -f Directory.Build.props ]]; then
+            # https://stackoverflow.com/a/57510475
+            # https://docs.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2022
+            sed -i Directory.Build.props \
+              -e "s;<Version>.*</Version>;<Version>${VERSION}.0.0.0</Version>;" \
+              -e "s;<AssemblyVersion>.*</AssemblyVersion>;<AssemblyVersion>${VERSION}.0.0.0</AssemblyVersion>;" \
+              -e "s;<FileVersion>.*</FileVersion>;<FileVersion>${VERSION}.0.0.0</FileVersion>;"
+          fi
+
+          yq eval '.version = env(VERSION) | .targetAbi = env(ABI_VERSION) | .changelog = strenv(CHANGELOG) | .changelog style="literal"' -i build.yaml
 
       - name: Commit Changes
         if: ${{ env.HAS_CHANGES == 'true' }}
