@@ -1,3 +1,5 @@
+# DEPRECATED: Please use / rely on the changelog workflow as that works with protected branches
+
 on:
   workflow_call:
     inputs:
@@ -35,11 +37,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2.4.0
-
-      - name: Setup YQ
-        uses: chrisdickinson/setup-yq@v1.0.1
-        with:
-          yq-version: v4.16.2
 
       - name: Read current version
         run: |-
