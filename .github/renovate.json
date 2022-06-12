@@ -1,23 +1,20 @@
 {
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "github>jellyfin/.github//renovate-presets/default",
+    ":dependencyDashboard"
   ],
-  "labels": ["dependencies"],
   "packageRules": [
     {
-      "matchManagers": ["github-actions"],
-      "addLabels": ["github_actions"]
-    },
-    {
+      "description": "Auto update the Git submodules of this repository and auto merge the branches",
       "matchManagers": ["git-submodules"],
       "addLabels": ["git-submodules"],
       "automerge": true,
+      "ignoreTests": true,
       "automergeType": "branch"
     }
   ],
   "git-submodules": {
     "enabled": true
-  },
-  "timezone": "Etc/UTC",
-  "schedule": ["before 2am"]
+  }
 }
