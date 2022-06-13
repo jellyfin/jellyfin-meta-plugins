@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2.4.2
+        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # tag=v2.4.2
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v1.9.0
+        uses: actions/setup-dotnet@499789684c9a0d41c9b3f0d66a785ba17b1d51ab # tag=v1.9.0
         with:
           dotnet-version: "${{ inputs.dotnet-version }}"
 
