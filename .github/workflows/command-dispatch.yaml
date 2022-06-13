@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Command Dispatch
-        uses: peter-evans/slash-command-dispatch@40877f718dce0101edfc7aea2b3800cc192f9ed5 # tag=v2.3.0
+        uses: peter-evans/slash-command-dispatch@2afb49dbaafaba8005860648bf7fc178637aca0d # tag=v3.0.0
         with:
           token: ${{ secrets.token }}
           reaction-token: ${{ secrets.token }}
