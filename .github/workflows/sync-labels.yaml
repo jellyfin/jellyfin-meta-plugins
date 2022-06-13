@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: EndBug/label-sync@v2.0.0
+      - uses: EndBug/label-sync@9d317a2cea1024a770a9d32af7b3b33a806fe013 # tag=v2.0.0
         with:
           config-file: https://raw.githubusercontent.com/jellyfin/jellyfin-meta-plugins/master/.github/plugin-repo-labels.yaml
           delete-other-labels: true

@@ -26,7 +26,7 @@ jobs:
     steps:
       # Drafts your next Release notes as Pull Requests are merged into "master"
       - name: Update Draft
-        uses: release-drafter/release-drafter@v5.19.0
+        uses: release-drafter/release-drafter@e9ee02fbac03d922bac6212003695e8358dd88b0 # tag=v5.19.0
         id: draft
         env:
           GITHUB_TOKEN: ${{ secrets.token }}
@@ -49,7 +49,7 @@ jobs:
 
       - name: Checkout Repository
         if: ${{ env.HAS_CHANGES == 'true' }}
-        uses: actions/checkout@v2.4.2
+        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # tag=v2.4.2
 
       - name: Update build.yaml
         if: ${{ env.HAS_CHANGES == 'true' }}
@@ -76,7 +76,7 @@ jobs:
 
       - name: Create or Update PR
         if: ${{ env.HAS_CHANGES == 'true' }}
-        uses: k3rnels-actions/pr-update@v1.1.0
+        uses: k3rnels-actions/pr-update@a87040e0e78e4d149e0e941a96bc2a9470562a69 # tag=v1.1.0
         with:
           token: ${{ secrets.token }}
           pr_title: Prepare for release ${{ steps.draft.outputs.tag_name }}

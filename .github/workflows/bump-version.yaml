@@ -36,7 +36,7 @@ jobs:
     if: ${{ ! inputs.isUnstable }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2.4.2
+        uses: actions/checkout@7884fcad6b5d53d10323aee724dc68d8b9096a2e # tag=v2.4.2
 
       - name: Read current version
         run: |-
