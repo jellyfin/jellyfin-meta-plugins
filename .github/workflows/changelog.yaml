@@ -26,7 +26,7 @@ jobs:
     steps:
       # Drafts your next Release notes as Pull Requests are merged into "master"
       - name: Update Draft
-        uses: release-drafter/release-drafter@06a49bf28488e030d35ca2ac6dbf7f408a481779 # tag=v5.20.1
+        uses: release-drafter/release-drafter@df69d584deac33d8569990cb6413f82447181076 # tag=v5.21.0
         id: draft
         env:
           GITHUB_TOKEN: ${{ secrets.token }}
