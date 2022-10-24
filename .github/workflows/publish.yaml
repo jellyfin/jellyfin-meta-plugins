@@ -35,7 +35,7 @@ jobs:
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@45c9f236cf9a0c09d11298348f6ed06bd81914c0 # tag=v3.0.1
+        uses: actions/setup-dotnet@4d4a70f4a5b2a5a5329f13be4ac933f2c9206ac0 # tag=v3.0.2
         with:
           dotnet-version: "${{ inputs.dotnet-version }}"
 
@@ -46,7 +46,7 @@ jobs:
           dotnet-target: "${{ inputs.dotnet-target }}"
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3.1.0
+        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # tag=v3.1.1
         with:
           name: build-artifact
           retention-days: 30
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifact
-        uses: actions/download-artifact@fb598a63ae348fa914e94cd0ff38f362e927b741 # tag=v3.0.0
+        uses: actions/download-artifact@9782bd6a9848b53b110e712e20e42d89988822b7 # tag=v3.0.1
         with:
           name: build-artifact
 
@@ -72,7 +72,7 @@ jobs:
           ls -l
 
       - name: Upload GH Release Assets
-        uses: shogo82148/actions-upload-release-asset@8dbaa4469aa7256e70624d72f2567fac8f5341b3 # tag=v1.6.2
+        uses: shogo82148/actions-upload-release-asset@e94a7386c3c266a207386460471b1efb5c7431eb # tag=v1.6.3
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./*
