@@ -76,7 +76,7 @@ jobs:
 
       - name: Create or Update PR
         if: ${{ env.HAS_CHANGES == 'true' }}
-        uses: k3rnels-actions/pr-update@2c8df8a7aacba86aac079e5a6acd74305af07d9c # tag=v1.1.1
+        uses: k3rnels-actions/pr-update@f22e3c8a08dc39f6d41b4cb44ad8250c40c19261 # tag=v2.0.0
         with:
           token: ${{ secrets.token }}
           pr_title: Prepare for release ${{ steps.draft.outputs.tag_name }}
