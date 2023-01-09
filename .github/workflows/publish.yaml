@@ -46,7 +46,7 @@ jobs:
           dotnet-target: "${{ inputs.dotnet-target }}"
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # tag=v3.1.1
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: build-artifact
           retention-days: 30
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download Artifact
-        uses: actions/download-artifact@9782bd6a9848b53b110e712e20e42d89988822b7 # tag=v3.0.1
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
           name: build-artifact
 
@@ -78,7 +78,7 @@ jobs:
           asset_path: ./*
 
       - name: Ensure Destination Path Exists
-        uses: appleboy/ssh-action@4a03da89e5c43da56e502053be4bbcb293411883 # v0.1.6
+        uses: appleboy/ssh-action@d91a1af6f57cd4478ceee14d7705601dafabaa19 # v0.1.7
         if: ${{ contains(github.repository, 'jellyfin/') }}
         with:
           host: ${{ secrets.deploy-host }}
@@ -109,7 +109,7 @@ jobs:
       JELLYFIN_REPO_URL: "https://repo.jellyfin.org/releases/plugin/"
     steps:
       - name: Update Plugin Manifest
-        uses: appleboy/ssh-action@4a03da89e5c43da56e502053be4bbcb293411883 # v0.1.6
+        uses: appleboy/ssh-action@d91a1af6f57cd4478ceee14d7705601dafabaa19 # v0.1.7
         with:
           host: ${{ secrets.deploy-host }}
           username: ${{ secrets.deploy-user }}
