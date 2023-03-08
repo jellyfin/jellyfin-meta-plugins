@@ -72,13 +72,13 @@ jobs:
           ls -l
 
       - name: Upload GH Release Assets
-        uses: shogo82148/actions-upload-release-asset@e94a7386c3c266a207386460471b1efb5c7431eb # tag=v1.6.3
+        uses: shogo82148/actions-upload-release-asset@b016af922a61601d647ff60226adadbe146b7651 # v1.6.4
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./*
 
       - name: Ensure Destination Path Exists
-        uses: appleboy/ssh-action@d91a1af6f57cd4478ceee14d7705601dafabaa19 # v0.1.7
+        uses: appleboy/ssh-action@b60142998894e495c513803efc6d5d72a72c968a # v0.1.8
         if: ${{ contains(github.repository, 'jellyfin/') }}
         with:
           host: ${{ secrets.deploy-host }}
@@ -109,7 +109,7 @@ jobs:
       JELLYFIN_REPO_URL: "https://repo.jellyfin.org/releases/plugin/"
     steps:
       - name: Update Plugin Manifest
-        uses: appleboy/ssh-action@d91a1af6f57cd4478ceee14d7705601dafabaa19 # v0.1.7
+        uses: appleboy/ssh-action@b60142998894e495c513803efc6d5d72a72c968a # v0.1.8
         with:
           host: ${{ secrets.deploy-host }}
           username: ${{ secrets.deploy-user }}
