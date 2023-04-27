@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
 
       - name: Setup .NET
         uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a # tag=v3.0.3
@@ -78,7 +78,7 @@ jobs:
           asset_path: ./*
 
       - name: Ensure Destination Path Exists
-        uses: appleboy/ssh-action@b60142998894e495c513803efc6d5d72a72c968a # v0.1.8
+        uses: appleboy/ssh-action@334f9259f2f8eb3376d33fa4c684fff373f2c2a6 # v0.1.10
         if: ${{ contains(github.repository, 'jellyfin/') }}
         with:
           host: ${{ secrets.deploy-host }}
@@ -109,7 +109,7 @@ jobs:
       JELLYFIN_REPO_URL: "https://repo.jellyfin.org/releases/plugin/"
     steps:
       - name: Update Plugin Manifest
-        uses: appleboy/ssh-action@b60142998894e495c513803efc6d5d72a72c968a # v0.1.8
+        uses: appleboy/ssh-action@334f9259f2f8eb3376d33fa4c684fff373f2c2a6 # v0.1.10
         with:
           host: ${{ secrets.deploy-host }}
           username: ${{ secrets.deploy-user }}
