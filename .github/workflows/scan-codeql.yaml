@@ -26,18 +26,18 @@ jobs:
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@607fce577a46308457984d59e4954e075820f10a # tag=v3.0.3
+        uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # v3.2.0
         with:
           dotnet-version: "${{ inputs.dotnet-version }}"
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@f3feb00acb00f31a6f60280e6ace9ca31d91c76a # v2.3.2
+        uses: github/codeql-action/init@0225834cc549ee0ca93cb085b92954821a145866 # v2.3.5
         with:
           languages: ${{ matrix.language }}
           queries: +security-and-quality
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@f3feb00acb00f31a6f60280e6ace9ca31d91c76a # v2.3.2
+        uses: github/codeql-action/autobuild@0225834cc549ee0ca93cb085b92954821a145866 # v2.3.5
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@f3feb00acb00f31a6f60280e6ace9ca31d91c76a # v2.3.2
+        uses: github/codeql-action/analyze@0225834cc549ee0ca93cb085b92954821a145866 # v2.3.5
