@@ -78,7 +78,7 @@ jobs:
           asset_path: ./*
 
       - name: Ensure Destination Path Exists
-        uses: appleboy/ssh-action@55dabf81b49d4120609345970c91507e2d734799 # v1.0.0
+        uses: appleboy/ssh-action@8f949198563a347a01c65ffc60399aef2b59d4ab # v1.0.1
         if: ${{ contains(github.repository, 'jellyfin/') }}
         with:
           host: ${{ secrets.deploy-host }}
@@ -109,7 +109,7 @@ jobs:
       JELLYFIN_REPO_URL: "https://repo.jellyfin.org/releases/plugin/"
     steps:
       - name: Update Plugin Manifest
-        uses: appleboy/ssh-action@55dabf81b49d4120609345970c91507e2d734799 # v1.0.0
+        uses: appleboy/ssh-action@8f949198563a347a01c65ffc60399aef2b59d4ab # v1.0.1
         with:
           host: ${{ secrets.deploy-host }}
           username: ${{ secrets.deploy-user }}
