@@ -62,10 +62,6 @@
 	path = jellyfin-plugin-omdb
 	url = https://github.com/jellyfin/jellyfin-plugin-omdb.git
 	branch = master
-[submodule "jellyfin-plugin-tmdb"]
-	path = jellyfin-plugin-tmdb
-	url = https://github.com/jellyfin/jellyfin-plugin-tmdb.git
-	branch = master
 [submodule "jellyfin-plugin-tvmaze"]
 	path = jellyfin-plugin-tvmaze
 	url = https://github.com/jellyfin/jellyfin-plugin-tvmaze.git
@@ -101,4 +97,16 @@
 [submodule "jellyfin-plugin-vgmdb"]
 	path = jellyfin-plugin-vgmdb
 	url = https://github.com/jellyfin/jellyfin-plugin-vgmdb.git
+	branch = master
+[submodule "jellyfin-plugin-discogs"]
+	path = jellyfin-plugin-discogs
+	url = https://github.com/jellyfin/jellyfin-plugin-discogs.git
+	branch = master
+[submodule "jellyfin-plugin-dlna"]
+	path = jellyfin-plugin-dlna
+	url = https://github.com/jellyfin/jellyfin-plugin-dlna.git
+	branch = master
+[submodule "jellyfin-plugin-subtitleextract"]
+	path = jellyfin-plugin-subtitleextract
+	url = https://github.com/jellyfin/jellyfin-plugin-subtitleextract.git
 	branch = master
