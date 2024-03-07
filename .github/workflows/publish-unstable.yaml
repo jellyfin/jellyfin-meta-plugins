@@ -1,0 +1,28 @@
+on:
+  repository_dispatch:
+    types: [trigger-workflow]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get install --yes python3-git
+
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - name: Add unstable nuget repo
+        run: |
+          dotnet nuget add source --name jellyfin-unstable "https://nuget.pkg.github.com/jellyfin/index.json"
+
+      - name: Install dotnet-outdated
+        run: |
+          dotnet tool install --global dotnet-outdated-tool
+
+      - name: Run build
+        run: |
+          ./build_unstable.py
+
