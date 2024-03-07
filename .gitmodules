@@ -54,14 +54,6 @@
 	path = jellyfin-plugin-kitsu
 	url = https://github.com/jellyfin/jellyfin-plugin-kitsu.git
 	branch = master
-[submodule "jellyfin-plugin-musicbrainz"]
-	path = jellyfin-plugin-musicbrainz
-	url = https://github.com/jellyfin/jellyfin-plugin-musicbrainz.git
-	branch = master
-[submodule "jellyfin-plugin-omdb"]
-	path = jellyfin-plugin-omdb
-	url = https://github.com/jellyfin/jellyfin-plugin-omdb.git
-	branch = master
 [submodule "jellyfin-plugin-tvmaze"]
 	path = jellyfin-plugin-tvmaze
 	url = https://github.com/jellyfin/jellyfin-plugin-tvmaze.git
