@@ -102,3 +102,7 @@
 	path = jellyfin-plugin-subtitleextract
 	url = https://github.com/jellyfin/jellyfin-plugin-subtitleextract.git
 	branch = master
+[submodule "jellyfin-plugin-intros"]
+	path = jellyfin-plugin-intros
+	url = https://github.com/jellyfin/jellyfin-plugin-intros.git
+	branch = master
