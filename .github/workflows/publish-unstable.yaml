@@ -1,0 +1,133 @@
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+      dotnet-version:
+        required: false
+        default: "8.0.x"
+        description: "The .NET version to setup for the build"
+        type: string
+      dotnet-target:
+        required: false
+        default: "net8.0"
+        description: "The .NET target to set for JPRM"
+        type: string
+    secrets:
+      deploy-host:
+        required: true
+      deploy-user:
+        required: true
+      deploy-key:
+        required: true
+      token:
+        required: true
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
+        with:
+          dotnet-version: "${{ inputs.dotnet-version }}"
+
+      - name: Update prerelease dependencies
+        id: unstable
+        run: |
+          dotnet nuget add source --username jellyfin-bot --password ${{ secrets.token }} --store-password-in-clear-text --name jellyfin-pre "https://nuget.pkg.github.com/jellyfin/index.json"
+          dotnet tool install --global dotnet-outdated-tool
+          dotnet outdated -pre Always -u -inc Jellyfin
+
+      - name: Build Jellyfin Plugin
+        uses: oddstr13/jellyfin-plugin-repository-manager@c50dc5dd020159a7aaa013ec7047f8043f8ea8a8 # v1.0.12
+        id: jprm
+        with:
+          dotnet-target: "${{ inputs.dotnet-target }}"
+          version: ${{ '2024.0324.1610' }} # TODO generate an actual version here
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
+        with:
+          name: build-artifact
+          retention-days: 30
+          if-no-files-found: error
+          path: ${{ steps.jprm.outputs.artifact }}
+
+  upload:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
+        with:
+          name: build-artifact
+
+      - name: Prepare GH Release Assets
+        run: |-
+          for file in ./*; do
+            md5sum ${file#./} >> ${file%.*}.md5
+            sha256sum ${file#./} >> ${file%.*}.sha256
+          done
+          ls -l
+
+      - name: Upload GH Release Assets
+        uses: shogo82148/actions-upload-release-asset@5bd52f05dd8076794da5975d4c0a4f3bce7dd8f5 # v1.7.4
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./*
+
+      - name: Ensure Destination Path Exists
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
+        if: ${{ contains(github.repository, 'jellyfin/') }}
+        with:
+          host: ${{ secrets.deploy-host }}
+          username: ${{ secrets.deploy-user }}
+          key: ${{ secrets.deploy-key }}
+          script_stop: true
+          script: |-
+            mkdir -p "/srv/incoming/plugin/${{ github.repository }}/${{ inputs.version }}" || exit 1
+
+      - name: Upload Jellyfin Plugin Repository Assets
+        uses: burnett01/rsync-deployments@0dc935cdecc5f5e571865e60d2a6cdc673704823 # tag=5.2
+        if: ${{ contains(github.repository, 'jellyfin/') }}
+        with:
+          switches: -vrptz
+          path: ./*.zip
+          remote_path: /srv/incoming/plugin/${{ github.repository }}/${{ inputs.version }}
+          remote_host: ${{ secrets.deploy-host }}
+          remote_user: ${{ secrets.deploy-user }}
+          remote_key: ${{ secrets.deploy-key }}
+
+  publish-unstable:
+    needs:
+      - upload
+    runs-on: ubuntu-latest
+    if: ${{ contains(github.repository, 'jellyfin/') }}
+    env:
+      JELLYFIN_REPO: "/srv/repository/main/plugin/manifest-unstable.json"
+      JELLYFIN_REPO_URL: "https://repo.jellyfin.org/files/plugin/"
+    steps:
+      - name: Update Plugin Manifest
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
+        with:
+          host: ${{ secrets.deploy-host }}
+          username: ${{ secrets.deploy-user }}
+          key: ${{ secrets.deploy-key }}
+          script_stop: true
+          envs: JELLYFIN_REPO,JELLYFIN_REPO_URL
+          script: |-
+            lockfile="/run/lock/jprm.lock"
+            pushd "/srv/incoming/plugin/${{ github.repository }}/${{ inputs.version }}" || exit 1
+            (
+                flock -x 300
+                sudo /usr/local/bin/jprm --verbosity=debug repo add --url="${JELLYFIN_REPO_URL}" "${JELLYFIN_REPO}" ./*.zip || exit 1
+            ) 300>${lockfile}
+            popd || exit 1
+            rm -r "/srv/incoming/plugin/${{ github.repository }}/${{ inputs.version }}" || exit 1
