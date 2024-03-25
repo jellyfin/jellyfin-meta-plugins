@@ -1,9 +1,6 @@
 on:
   workflow_call:
     inputs:
-      version:
-        required: true
-        type: string
       dotnet-version:
         required: false
         default: "8.0.x"
@@ -44,12 +41,22 @@ jobs:
           dotnet tool install --global dotnet-outdated-tool
           dotnet outdated -pre Always -u -inc Jellyfin
 
+      - name: Generate version number using date and run number
+        id: version-creator
+        run: |
+          buildDay=`date +%Y.%m%d`
+          echo $buildDay
+          runNum=$GITHUB_RUN_NUMBER
+          ver="${buildDay}.${runNum}.0"
+          echo $ver
+          echo "PLUGIN_VERSION=$ver" >> $GITHUB_OUTPUT
+
       - name: Build Jellyfin Plugin
         uses: oddstr13/jellyfin-plugin-repository-manager@c50dc5dd020159a7aaa013ec7047f8043f8ea8a8 # v1.0.12
         id: jprm
         with:
           dotnet-target: "${{ inputs.dotnet-target }}"
-          version: ${{ '2024.0324.1610' }} # TODO generate an actual version here
+          version: ${{ steps.version-creator.outputs.PLUGIN_VERSION }}
 
       - name: Upload Artifact
         uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # v4.3.1
@@ -105,7 +112,7 @@ jobs:
           remote_user: ${{ secrets.deploy-user }}
           remote_key: ${{ secrets.deploy-key }}
 
-  publish-unstable:
+  publish:
     needs:
       - upload
     runs-on: ubuntu-latest
