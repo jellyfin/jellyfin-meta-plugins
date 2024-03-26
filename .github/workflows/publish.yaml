@@ -105,7 +105,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ contains(github.repository, 'jellyfin/') }}
     env:
-      JELLYFIN_REPO: "/srv/repository/main/plugin/manifest-stable.json"
+      JELLYFIN_REPO: "/srv/repository/main/plugin/manifest.json"
       JELLYFIN_REPO_URL: "https://repo.jellyfin.org/files/plugin/"
     steps:
       - name: Update Plugin Manifest

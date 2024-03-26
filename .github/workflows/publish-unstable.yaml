@@ -105,8 +105,8 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ contains(github.repository, 'jellyfin/') }}
     env:
-      JELLYFIN_REPO: "/srv/repository/main/plugin/manifest-unstable.json"
-      JELLYFIN_REPO_URL: "https://repo.jellyfin.org/files/plugin/"
+      JELLYFIN_REPO: "/srv/repository/main/plugin-unstable/manifest.json"
+      JELLYFIN_REPO_URL: "https://repo.jellyfin.org/files/plugin-unstable/"
     steps:
       - name: Update Plugin Manifest
         uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
