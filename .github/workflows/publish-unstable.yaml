@@ -46,7 +46,7 @@ jobs:
         id: version-creator
         run: |
           pluginVersion=`grep 'version:' build.yaml | awk '{ print $2 }' | tr -d '"'`
-          buildDay=`date +%Y%m`
+          buildDay=`date +%y%m`
           runNum=$GITHUB_RUN_NUMBER
           ver="${pluginVersion}.${buildDay}.${runNum}.0"
           echo "PLUGIN_VERSION=$ver" >> $GITHUB_OUTPUT
