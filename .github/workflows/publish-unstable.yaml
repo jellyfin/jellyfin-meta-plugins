@@ -45,11 +45,10 @@ jobs:
       - name: Generate version number using date and run number
         id: version-creator
         run: |
-          buildDay=`date +%Y.%m%d`
-          echo $buildDay
+          pluginVersion=`grep 'version:' build.yaml | awk -F '"' '{ print $2 }'`
+          buildDay=`date +%Y%m`
           runNum=$GITHUB_RUN_NUMBER
-          ver="${buildDay}.${runNum}.0"
-          echo $ver
+          ver="${pluginVersion}.${buildDay}.${runNum}.0"
           echo "PLUGIN_VERSION=$ver" >> $GITHUB_OUTPUT
 
       - name: Build Jellyfin Plugin
