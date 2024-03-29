@@ -52,7 +52,7 @@ jobs:
           echo "PLUGIN_VERSION=$ver" >> $GITHUB_OUTPUT
 
       - name: Build Jellyfin Plugin
-        uses: oddstr13/jellyfin-plugin-repository-manager@c50dc5dd020159a7aaa013ec7047f8043f8ea8a8 # v1.0.12
+        uses: oddstr13/jellyfin-plugin-repository-manager@843260fcdfda7cba229c5abd77bdd9c6fc4e850b # v1.1.0
         id: jprm
         with:
           dotnet-target: "${{ inputs.dotnet-target }}"
