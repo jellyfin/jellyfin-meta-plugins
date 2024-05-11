@@ -6,7 +6,7 @@ on:
         type: string
       dotnet-version:
         required: false
-        default: "6.0.x"
+        default: "8.0.x"
         description: "The .NET version to setup for the build"
         type: string
 
