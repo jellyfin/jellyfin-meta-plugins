@@ -106,3 +106,7 @@
 	path = jellyfin-plugin-intros
 	url = https://github.com/jellyfin/jellyfin-plugin-intros.git
 	branch = master
+[submodule "jellyfin-plugin-transcodekiller"]
+	path = jellyfin-plugin-transcodekiller
+	url = https://github.com/jellyfin/jellyfin-plugin-transcodekiller.git
+	branch = master
