@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Rebase PR
-        uses: peter-evans/rebase@52289ddc070ea10c8e2530c0740972ff39ac8769 # v3.0.0
+        uses: peter-evans/rebase@87c3fd9344792e51ab1c7494c3369620c84ed852 # v3.1.0
         id: rebase
         with:
           head: ${{ inputs.rebase-head }}
