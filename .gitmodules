@@ -110,3 +110,7 @@
 	path = jellyfin-plugin-transcodekiller
 	url = https://github.com/jellyfin/jellyfin-plugin-transcodekiller.git
 	branch = master
+[submodule "jellyfin-plugin-chapter-segments"]
+	path = jellyfin-plugin-chapter-segments
+	url = https://github.com/jellyfin/jellyfin-plugin-chapter-segments.git
+	branch = master
