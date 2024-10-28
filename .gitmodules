@@ -114,3 +114,7 @@
 	path = jellyfin-plugin-chapter-segments
 	url = https://github.com/jellyfin/jellyfin-plugin-chapter-segments.git
 	branch = master
+[submodule "jellyfin-plugin-lrclib"]
+	path = jellyfin-plugin-lrclib
+	url = https://github.com/jellyfin/jellyfin-plugin-lrclib.git
+	branch = master
