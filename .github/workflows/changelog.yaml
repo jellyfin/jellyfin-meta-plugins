@@ -26,7 +26,7 @@ jobs:
     steps:
       # Drafts your next Release notes as Pull Requests are merged into "master"
       - name: Update Draft
-        uses: release-drafter/release-drafter@3f0f87098bd6b5c5b9a36d49c41d998ea58f9348 # v6.0.0
+        uses: release-drafter/release-drafter@b1476f6e6eb133afa41ed8589daba6dc69b4d3f5 # v6.1.0
         id: draft
         env:
           GITHUB_TOKEN: ${{ secrets.token }}
@@ -49,7 +49,7 @@ jobs:
 
       - name: Checkout Repository
         if: ${{ env.HAS_CHANGES == 'true' }}
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Update build.yaml
         if: ${{ env.HAS_CHANGES == 'true' }}
