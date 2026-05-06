@@ -118,3 +118,15 @@
 	path = jellyfin-plugin-lrclib
 	url = https://github.com/jellyfin/jellyfin-plugin-lrclib.git
 	branch = master
+[submodule "jellyfin-plugin-openlibrary"]
+	path = jellyfin-plugin-openlibrary
+	url = https://github.com/jellyfin/jellyfin-plugin-openlibrary.git
+	branch = master
+[submodule "jellyfin-plugin-comicvine"]
+	path = jellyfin-plugin-comicvine
+	url = https://github.com/jellyfin/jellyfin-plugin-comicvine.git
+	branch = master
+[submodule "jellyfin-plugin-googlebooks"]
+	path = jellyfin-plugin-googlebooks
+	url = https://github.com/jellyfin/jellyfin-plugin-googlebooks.git
+	branch = master
