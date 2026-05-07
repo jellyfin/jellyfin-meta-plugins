@@ -28,8 +28,8 @@ jobs:
       - name: Update Draft
         uses: release-drafter/release-drafter@563bf132657a13ded0b01fcb723c5a58cdd824e2 # v7.2.1
         id: draft
-        env:
-          GITHUB_TOKEN: ${{ secrets.token }}
+        with:
+          token: ${{ secrets.token }}
 
       - name: Set-up Environment
         run: |-
