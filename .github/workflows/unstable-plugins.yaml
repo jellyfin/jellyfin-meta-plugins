@@ -11,7 +11,6 @@ on:
 
 permissions:
   contents: read
-  packages: read
 
 jobs:
   create-unstable-branches:
@@ -28,7 +27,7 @@ jobs:
       - name: Configure
         env:
           GH_TOKEN: ${{ secrets.JF_BOT_TOKEN }}
-          NUGET_AUTH_TOKEN: ${{ github.token }}
+          NUGET_AUTH_TOKEN: ${{ secrets.JF_BOT_TOKEN }}
         run: |
           git config --global user.name "jellyfin-bot"
           git config --global user.email "team@jellyfin.org"
