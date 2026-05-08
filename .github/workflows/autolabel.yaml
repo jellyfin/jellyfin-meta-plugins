@@ -1,0 +1,22 @@
+on:
+  workflow_call:
+    inputs:
+      repository-name:
+        required: true
+        type: string
+    secrets:
+      token:
+        required: true
+
+jobs:
+  autolabel:
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == inputs.repository-name }}
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Autolabel Pull Request
+        uses: release-drafter/release-drafter/autolabeler@563bf132657a13ded0b01fcb723c5a58cdd824e2 # v7.2.1
+        with:
+          token: ${{ secrets.token }}
