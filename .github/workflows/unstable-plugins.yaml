@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   create-unstable-branches:
@@ -25,7 +26,7 @@ jobs:
           dotnet-version: "10.0.x"
           source-url: https://nuget.pkg.github.com/jellyfin/index.json
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.JF_BOT_TOKEN }}
+          NUGET_AUTH_TOKEN: ${{ github.token }}
 
       - name: Configure git
         run: |
