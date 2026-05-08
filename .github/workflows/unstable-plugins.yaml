@@ -33,8 +33,21 @@ jobs:
           git config --global user.email "team@jellyfin.org"
           git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "git@github.com:"
           mkdir -p ~/.nuget/NuGet
-          echo '<configuration/>' > ~/.nuget/NuGet/NuGet.Config
-          dotnet nuget add source --username jellyfin-bot --password "${NUGET_AUTH_TOKEN}" --store-password-in-clear-text --name jellyfin-pre "https://nuget.pkg.github.com/jellyfin/index.json"
+          cat > ~/.nuget/NuGet/NuGet.Config << NUGETEOF
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <packageSources>
+              <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+              <add key="jellyfin-pre" value="https://nuget.pkg.github.com/jellyfin/index.json" />
+            </packageSources>
+            <packageSourceCredentials>
+              <jellyfin-pre>
+                <add key="Username" value="jellyfin-bot" />
+                <add key="ClearTextPassword" value="${NUGET_AUTH_TOKEN}" />
+              </jellyfin-pre>
+            </packageSourceCredentials>
+          </configuration>
+          NUGETEOF
 
       - name: Create unstable branches
         env:
