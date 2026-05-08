@@ -1,0 +1,46 @@
+name: Create Unstable Plugin Branches
+
+on:
+  schedule:
+    # Fallback: run Monday at 08:00 UTC if jellyfin-packaging dispatch never arrives
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+  repository_dispatch:
+    types:
+      - jellyfin-unstable-build
+
+permissions:
+  contents: read
+
+jobs:
+  create-unstable-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
+        with:
+          dotnet-version: "10.0.x"
+          cache: true
+
+      - name: Configure git
+        run: |
+          git config --global user.name "jellyfin-bot"
+          git config --global user.email "team@jellyfin.org"
+          git config --global url."https://x-access-token:${{ secrets.token }}@github.com/".insteadOf "git@github.com:"
+
+      - name: Configure NuGet
+        run: |
+          dotnet nuget add source \
+            --username jellyfin-bot \
+            --password ${{ secrets.token }} \
+            --store-password-in-clear-text \
+            --name jellyfin-pre \
+            "https://nuget.pkg.github.com/jellyfin/index.json"
+
+      - name: Create unstable branches
+        env:
+          GH_TOKEN: ${{ secrets.token }}
+        run: python3 unstable_plugins.py
