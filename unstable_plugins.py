@@ -2,6 +2,7 @@
 """Create unstable branches for Jellyfin plugin submodules."""
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -14,6 +15,8 @@ NUGET_SOURCE_URL = "https://nuget.pkg.github.com/jellyfin/index.json"
 UNSTABLE_BRANCH = "unstable"
 PR_TITLE = "Unstable: Update to latest Jellyfin preview packages"
 MAX_FIX_ITERATIONS = 10
+IS_CI = os.environ.get("CI", "").lower() == "true"
+ERROR_LOG_MAX_LINES = 200
 
 _RE_JELLYFIN_PKG = re.compile(
     r'(PackageReference\s[^>]*Include="Jellyfin\.[^"]*"[^>]*Version=")(\d+)\.\*-\*(")'
@@ -193,18 +196,19 @@ def fix_nu1605(output_text, plugin_dir):
 
 
 def dotnet_restore(plugin_dir):
+    last_err = None
     for _ in range(MAX_FIX_ITERATIONS):
         result = subprocess.run(
             ["dotnet", "restore"], cwd=plugin_dir, capture_output=True, text=True
         )
         if result.returncode == 0:
-            return True
+            return True, None
         combined = result.stdout + result.stderr
+        last_err = combined
         if "NU1605" in combined and fix_nu1605(combined, plugin_dir):
             continue
-        print(combined, file=sys.stderr)
-        return False
-    return False
+        return False, combined
+    return False, last_err or "max fix iterations reached"
 
 
 def dotnet_build(plugin_dir):
@@ -222,17 +226,17 @@ def dotnet_build(plugin_dir):
     return False, "max fix iterations reached"
 
 
-def commit_push(plugin_dir):
+def commit_push(plugin_dir, failing=False):
     run(["git", "add", "-A"], cwd=plugin_dir)
     staged = subprocess.run(
         ["git", "diff", "--cached", "--quiet", "--exit-code"], cwd=plugin_dir
     )
     if staged.returncode == 0:
         return False
-    run(
-        ["git", "commit", "-m", "Update Jellyfin NuGet packages to latest preview"],
-        cwd=plugin_dir,
-    )
+    msg = "Update Jellyfin NuGet packages to latest preview"
+    if failing:
+        msg = f"[build-failing] {msg}"
+    run(["git", "commit", "-m", msg], cwd=plugin_dir)
     ssh_url = get_output(
         ["gh", "repo", "view", "--json", "sshUrl", "-q", ".sshUrl"], cwd=plugin_dir
     )
@@ -241,16 +245,39 @@ def commit_push(plugin_dir):
     return True
 
 
-def create_pr(plugin_dir, repo, new_major):
+def _format_errors_section(errors):
+    if not errors:
+        return ""
+    lines = errors.strip().splitlines()
+    truncated = len(lines) > ERROR_LOG_MAX_LINES
+    if truncated:
+        lines = lines[-ERROR_LOG_MAX_LINES:]
+    body = "\n".join(lines)
+    note = f" (truncated, last {ERROR_LOG_MAX_LINES} lines)" if truncated else ""
+    return f"\n\n## Build errors{note}\n\n```\n{body}\n```\n"
+
+
+def _build_pr_body(new_major, errors=None):
+    return (
+        f"Update Jellyfin NuGet package version to `{new_major}.*-*`."
+        + _format_errors_section(errors)
+    )
+
+
+def create_pr(plugin_dir, repo, new_major, errors=None):
     return get_output([
         "gh", "pr", "create",
         "--repo", repo,
         "--title", PR_TITLE,
-        "--body", f"Update Jellyfin NuGet package version to `{new_major}.*-*`.",
+        "--body", _build_pr_body(new_major, errors),
         "--base", "master",
         "--head", UNSTABLE_BRANCH,
         "--draft",
     ], cwd=plugin_dir)
+
+
+def update_pr_body(plugin_dir, pr_url, body):
+    run(["gh", "pr", "edit", pr_url, "--body", body], cwd=plugin_dir)
 
 
 def process_plugin(plugin_dir, new_major, new_minor, tfm):
@@ -278,13 +305,19 @@ def process_plugin(plugin_dir, new_major, new_minor, tfm):
     update_ms_packages(plugin_dir, dotnet_major)
 
     print("  Restoring...")
-    if not dotnet_restore(plugin_dir):
+    ok, errors = dotnet_restore(plugin_dir)
+    if not ok:
+        print(errors, file=sys.stderr)
+        if IS_CI:
+            return _push_failing(plugin_dir, repo, new_major, pr_url, errors, "restore failed")
         return "error", "restore failed"
 
     print("  Building...")
     ok, errors = dotnet_build(plugin_dir)
     if not ok:
         print(errors, file=sys.stderr)
+        if IS_CI:
+            return _push_failing(plugin_dir, repo, new_major, pr_url, errors, "build failed")
         return "error", "build failed"
     print("  Build succeeded.")
 
@@ -292,11 +325,25 @@ def process_plugin(plugin_dir, new_major, new_minor, tfm):
         return "built", None
 
     if pr_url:
+        update_pr_body(plugin_dir, pr_url, _build_pr_body(new_major))
         return "updated", pr_url
 
     new_pr = create_pr(plugin_dir, repo, new_major)
     print(f"  Created PR: {new_pr}")
     return "created", new_pr
+
+
+def _push_failing(plugin_dir, repo, new_major, pr_url, errors, reason):
+    if not commit_push(plugin_dir, failing=True):
+        return "error", f"{reason} (no changes to push)"
+    body = _build_pr_body(new_major, errors)
+    if pr_url:
+        update_pr_body(plugin_dir, pr_url, body)
+        print(f"  Pushed [build-failing] commit to existing PR: {pr_url}")
+        return "pushed_failing", pr_url
+    new_pr = create_pr(plugin_dir, repo, new_major, errors=errors)
+    print(f"  Created [build-failing] PR: {new_pr}")
+    return "pushed_failing", new_pr
 
 
 def main():
@@ -319,7 +366,7 @@ def main():
     new_major, new_minor, tfm = discover_version()
     print(f"Target Jellyfin version: {new_major}.{new_minor} ({tfm})")
 
-    results = {"created": [], "updated": [], "built": [], "error": []}
+    results = {"created": [], "updated": [], "built": [], "pushed_failing": [], "error": []}
 
     for plugin_dir in plugins:
         try:
@@ -333,6 +380,7 @@ def main():
         ("PRs created", "created"),
         ("PRs updated", "updated"),
         ("Built (no changes)", "built"),
+        ("Pushed with failing build", "pushed_failing"),
         ("Errors", "error"),
     ]:
         if results[key]:

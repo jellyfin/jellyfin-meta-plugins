@@ -52,4 +52,5 @@ jobs:
       - name: Create unstable branches
         env:
           GH_TOKEN: ${{ secrets.JF_BOT_TOKEN }}
+          CI: "true"
         run: python3 unstable_plugins.py
