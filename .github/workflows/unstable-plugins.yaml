@@ -24,15 +24,18 @@ jobs:
         uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
         with:
           dotnet-version: "10.0.x"
-          source-url: https://nuget.pkg.github.com/jellyfin/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{ github.token }}
 
-      - name: Configure git
+      - name: Configure
+        env:
+          GH_TOKEN: ${{ secrets.JF_BOT_TOKEN }}
+          NUGET_AUTH_TOKEN: ${{ github.token }}
         run: |
           git config --global user.name "jellyfin-bot"
           git config --global user.email "team@jellyfin.org"
-          git config --global url."https://x-access-token:${{ secrets.JF_BOT_TOKEN }}@github.com/".insteadOf "git@github.com:"
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "git@github.com:"
+          mkdir -p ~/.nuget/NuGet
+          echo '<configuration/>' > ~/.nuget/NuGet/NuGet.Config
+          dotnet nuget add source --username jellyfin-bot --password "${NUGET_AUTH_TOKEN}" --store-password-in-clear-text --name jellyfin-pre "https://nuget.pkg.github.com/jellyfin/index.json"
 
       - name: Create unstable branches
         env:
