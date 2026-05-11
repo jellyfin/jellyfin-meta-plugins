@@ -228,15 +228,16 @@ def dotnet_build(plugin_dir):
 
 def commit_push(plugin_dir, failing=False):
     run(["git", "add", "-A"], cwd=plugin_dir)
-    staged = subprocess.run(
+    has_changes = subprocess.run(
         ["git", "diff", "--cached", "--quiet", "--exit-code"], cwd=plugin_dir
-    )
-    if staged.returncode == 0:
+    ).returncode != 0
+    if not has_changes and not failing:
         return False
     msg = "Update Jellyfin NuGet packages to latest preview"
-    if failing:
-        msg = f"[build-failing] {msg}"
-    run(["git", "commit", "-m", msg], cwd=plugin_dir)
+    commit_cmd = ["git", "commit", "-m", f"[build-failing] {msg}" if failing else msg]
+    if not has_changes:
+        commit_cmd.append("--allow-empty")
+    run(commit_cmd, cwd=plugin_dir)
     ssh_url = get_output(
         ["gh", "repo", "view", "--json", "sshUrl", "-q", ".sshUrl"], cwd=plugin_dir
     )
@@ -334,8 +335,8 @@ def process_plugin(plugin_dir, new_major, new_minor, tfm):
 
 
 def _push_failing(plugin_dir, repo, new_major, pr_url, errors, reason):
-    if not commit_push(plugin_dir, failing=True):
-        return "error", f"{reason} (no changes to push)"
+    del reason  # commit_push(failing=True) always pushes (empty commit if needed)
+    commit_push(plugin_dir, failing=True)
     body = _build_pr_body(new_major, errors)
     if pr_url:
         update_pr_body(plugin_dir, pr_url, body)
