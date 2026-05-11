@@ -22,10 +22,10 @@ _RE_JELLYFIN_PKG = re.compile(
     r'(PackageReference\s[^>]*Include="Jellyfin\.[^"]*"[^>]*Version=")(\d+)\.\*-\*(")'
 )
 _RE_MS_PKG = re.compile(
-    r'(PackageReference\s[^>]*Include="(?:Microsoft|System)\.[^"]*"[^>]*Version=")[^"]+(")'
+    r'(PackageReference\s[^>]*Include="(?:Microsoft\.(?:AspNetCore|Extensions)|System)\.[^"]*"[^>]*Version=")[^"]+(")'
 )
 _RE_NU1605 = re.compile(
-    r"NU1605: Detected package downgrade: ((?:Microsoft|System)\.[^\s]+) from ([\d.]+)"
+    r"NU1605:(?:\s*Warning As Error:)?\s*Detected package downgrade: ((?:Microsoft|System)\.[^\s]+) from ([\d.]+)"
 )
 _RE_TFM = re.compile(r"(<TargetFramework>)[^<]+(</TargetFramework>)")
 _RE_TARGET_ABI = re.compile(r'(targetAbi:\s*")[^"]+(")')
