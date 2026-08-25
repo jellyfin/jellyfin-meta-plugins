@@ -10,9 +10,6 @@
 [submodule "jellyfin-plugin-reports"]
 	path = jellyfin-plugin-reports
 	url = https://github.com/jellyfin/jellyfin-plugin-reports
-[submodule "jellyfin-plugin-bookshelf"]
-	path = jellyfin-plugin-bookshelf
-	url = https://github.com/jellyfin/jellyfin-plugin-bookshelf
 [submodule "jellyfin-plugin-opensubtitles"]
 	path = jellyfin-plugin-opensubtitles
 	url = https://github.com/jellyfin/jellyfin-plugin-opensubtitles
