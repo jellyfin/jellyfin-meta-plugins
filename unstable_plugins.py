@@ -7,6 +7,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import traceback
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent
@@ -17,6 +18,8 @@ PR_TITLE = "Unstable: Update to latest Jellyfin preview packages"
 MAX_FIX_ITERATIONS = 10
 IS_CI = os.environ.get("CI", "").lower() == "true"
 ERROR_LOG_MAX_LINES = 200
+
+REBASE_CONFLICTS = []
 
 _RE_JELLYFIN_PKG = re.compile(
     r'(PackageReference\s[^>]*Include="Jellyfin\.[^"]*"[^>]*Version=")(\d+)\.\*-\*(")'
@@ -134,6 +137,23 @@ def check_unstable(plugin_dir):
     return branch_exists, pr_url, repo
 
 
+def rebase_onto_master(plugin_dir):
+    result = subprocess.run(
+        ["git", "rebase", "origin/master"], cwd=plugin_dir, capture_output=True, text=True
+    )
+    if result.returncode == 0:
+        return True
+    print(result.stdout + result.stderr, file=sys.stderr)
+    run(["git", "rebase", "--abort"], cwd=plugin_dir, check=False)
+    return False
+
+
+def branch_moved(plugin_dir):
+    head = get_output(["git", "rev-parse", "HEAD"], cwd=plugin_dir)
+    remote = get_output(["git", "rev-parse", f"origin/{UNSTABLE_BRANCH}"], cwd=plugin_dir)
+    return head != remote
+
+
 def update_jellyfin_packages(plugin_dir, new_major):
     changed = False
     for csproj in plugin_dir.rglob("*.csproj"):
@@ -238,12 +258,17 @@ def commit_push(plugin_dir, failing=False):
     if not has_changes:
         commit_cmd.append("--allow-empty")
     run(commit_cmd, cwd=plugin_dir)
+    push_branch(plugin_dir)
+    return True
+
+
+def push_branch(plugin_dir):
+    # gh defaults to SSH; HTTPS pushes fail without credentials.
     ssh_url = get_output(
         ["gh", "repo", "view", "--json", "sshUrl", "-q", ".sshUrl"], cwd=plugin_dir
     )
     run(["git", "remote", "set-url", "origin", ssh_url], cwd=plugin_dir)
     run(["git", "push", "origin", UNSTABLE_BRANCH, "--force-with-lease"], cwd=plugin_dir)
-    return True
 
 
 def _format_errors_section(errors):
@@ -258,9 +283,20 @@ def _format_errors_section(errors):
     return f"\n\n## Build errors{note}\n\n```\n{body}\n```\n"
 
 
-def _build_pr_body(new_major, errors=None):
+def _format_rebase_section(rebase_conflict):
+    if not rebase_conflict:
+        return ""
+    return (
+        "\n\n## Rebase conflict\n\n"
+        "Rebasing this branch onto `master` failed with conflicts, so it is still "
+        "based on an older `master`. Resolve the conflicts and rebase manually.\n"
+    )
+
+
+def _build_pr_body(new_major, errors=None, rebase_conflict=False):
     return (
         f"Update Jellyfin NuGet package version to `{new_major}.*-*`."
+        + _format_rebase_section(rebase_conflict)
         + _format_errors_section(errors)
     )
 
@@ -287,10 +323,19 @@ def process_plugin(plugin_dir, new_major, new_minor, tfm):
 
     init_submodule(name)
     branch_exists, pr_url, repo = check_unstable(plugin_dir)
+    rebase_conflict = False
+    rebased = False
 
     if branch_exists and pr_url:
         print(f"  Updating existing PR: {pr_url}")
         run(["git", "checkout", "-f", "-B", UNSTABLE_BRANCH, f"origin/{UNSTABLE_BRANCH}"], cwd=plugin_dir)
+        print("  Rebasing onto master...")
+        if rebase_onto_master(plugin_dir):
+            rebased = branch_moved(plugin_dir)
+        else:
+            print("  Rebase conflicted; continuing without rebasing", file=sys.stderr)
+            REBASE_CONFLICTS.append(name)
+            rebase_conflict = True
     else:
         if branch_exists:
             print("  Deleting stale unstable branch")
@@ -310,7 +355,9 @@ def process_plugin(plugin_dir, new_major, new_minor, tfm):
     if not ok:
         print(errors, file=sys.stderr)
         if IS_CI:
-            return _push_failing(plugin_dir, repo, new_major, pr_url, errors, "restore failed")
+            return _push_failing(
+                plugin_dir, repo, new_major, pr_url, errors, "restore failed", rebase_conflict
+            )
         return "error", "restore failed"
 
     print("  Building...")
@@ -318,26 +365,38 @@ def process_plugin(plugin_dir, new_major, new_minor, tfm):
     if not ok:
         print(errors, file=sys.stderr)
         if IS_CI:
-            return _push_failing(plugin_dir, repo, new_major, pr_url, errors, "build failed")
+            return _push_failing(
+                plugin_dir, repo, new_major, pr_url, errors, "build failed", rebase_conflict
+            )
         return "error", "build failed"
     print("  Build succeeded.")
 
-    if not commit_push(plugin_dir):
-        return "built", None
+    committed = commit_push(plugin_dir)
+    if not committed and rebased:
+        print("  Pushing rebased branch...")
+        push_branch(plugin_dir)
 
+    # Always rebuild the body so a clean run clears a previous run's warnings.
     if pr_url:
-        update_pr_body(plugin_dir, pr_url, _build_pr_body(new_major))
-        return "updated", pr_url
+        update_pr_body(
+            plugin_dir, pr_url, _build_pr_body(new_major, rebase_conflict=rebase_conflict)
+        )
+        if committed:
+            return "updated", pr_url
+        return ("rebased" if rebased else "built"), pr_url
+
+    if not committed:
+        return "built", None
 
     new_pr = create_pr(plugin_dir, repo, new_major)
     print(f"  Created PR: {new_pr}")
     return "created", new_pr
 
 
-def _push_failing(plugin_dir, repo, new_major, pr_url, errors, reason):
+def _push_failing(plugin_dir, repo, new_major, pr_url, errors, reason, rebase_conflict=False):
     del reason  # commit_push(failing=True) always pushes (empty commit if needed)
     commit_push(plugin_dir, failing=True)
-    body = _build_pr_body(new_major, errors)
+    body = _build_pr_body(new_major, errors, rebase_conflict)
     if pr_url:
         update_pr_body(plugin_dir, pr_url, body)
         print(f"  Pushed [build-failing] commit to existing PR: {pr_url}")
@@ -367,19 +426,25 @@ def main():
     new_major, new_minor, tfm = discover_version()
     print(f"Target Jellyfin version: {new_major}.{new_minor} ({tfm})")
 
-    results = {"created": [], "updated": [], "built": [], "pushed_failing": [], "error": []}
+    results = {
+        "created": [], "updated": [], "rebased": [], "built": [], "pushed_failing": [], "error": []
+    }
 
     for plugin_dir in plugins:
         try:
             status, detail = process_plugin(plugin_dir, new_major, new_minor, tfm)
         except subprocess.CalledProcessError as e:
             status, detail = "error", str(e)
+        except Exception as e:  # keep processing the remaining plugins
+            traceback.print_exc()
+            status, detail = "error", f"{type(e).__name__}: {e}"
         results[status].append((plugin_dir.name, detail))
 
     print(f"\n{'=' * 60}\nSummary\n{'=' * 60}")
     for label, key in [
         ("PRs created", "created"),
         ("PRs updated", "updated"),
+        ("Rebased onto master (no other changes)", "rebased"),
         ("Built (no changes)", "built"),
         ("Pushed with failing build", "pushed_failing"),
         ("Errors", "error"),
@@ -388,6 +453,11 @@ def main():
             print(f"\n{label}:")
             for name, detail in results[key]:
                 print(f"  {name}" + (f": {detail}" if detail else ""))
+
+    if REBASE_CONFLICTS:
+        print("\nRebase onto master conflicted (resolve manually):")
+        for name in REBASE_CONFLICTS:
+            print(f"  {name}")
 
 
 if __name__ == "__main__":
