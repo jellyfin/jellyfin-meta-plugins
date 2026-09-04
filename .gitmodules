@@ -127,3 +127,7 @@
 	path = jellyfin-plugin-googlebooks
 	url = https://github.com/jellyfin/jellyfin-plugin-googlebooks.git
 	branch = master
+[submodule "jellyfin-plugin-folio"]
+	path = jellyfin-plugin-folio
+	url = https://github.com/jellyfin/jellyfin-plugin-folio.git
+	branch = master

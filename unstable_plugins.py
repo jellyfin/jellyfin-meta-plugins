@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Create unstable branches for Jellyfin plugin submodules."""
 import argparse
+import base64
 import json
 import os
 import re
@@ -8,6 +9,9 @@ import subprocess
 import sys
 import tempfile
 import traceback
+import urllib.error
+import urllib.request
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).parent
@@ -51,20 +55,85 @@ def ensure_nuget_source():
         )
 
 
+def _feed_token():
+    for var in ("NUGET_AUTH_TOKEN", "GH_TOKEN", "GITHUB_TOKEN"):
+        if os.environ.get(var):
+            return os.environ[var]
+    configs = [
+        Path.home() / ".nuget" / "NuGet" / "NuGet.Config",
+        REPO_ROOT / "NuGet.Config",
+        REPO_ROOT / "nuget.config",
+    ]
+    for cfg in configs:
+        if not cfg.is_file():
+            continue
+        try:
+            root = ET.parse(cfg).getroot()
+        except ET.ParseError:
+            continue
+        for entry in root.findall(f"./packageSourceCredentials/{NUGET_SOURCE_NAME}/add"):
+            if entry.get("key") == "ClearTextPassword" and entry.get("value"):
+                return entry.get("value")
+    return get_output(["gh", "auth", "token"], check=False) or None
+
+
+def _feed_get(url, token):
+    request = urllib.request.Request(url, headers={"Accept": "application/json"})
+    if token:
+        # GitHub Packages ignores the basic-auth username, only the token matters.
+        credential = base64.b64encode(f"jellyfin-bot:{token}".encode()).decode()
+        request.add_header("Authorization", f"Basic {credential}")
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            return json.load(response)
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", "replace").strip()
+        hint = ""
+        if e.code in (401, 403):
+            hint = "\nThe token is missing or lacks the 'read:packages' scope."
+        raise RuntimeError(
+            f"GET {url} failed: HTTP {e.code} {e.reason}{hint}\n{body}"
+        ) from None
+    except urllib.error.URLError as e:
+        raise RuntimeError(f"GET {url} failed: {e.reason}") from None
+
+
+def _version_key(version):
+    core, _, prerelease = version.partition("-")
+    core = core.split("+")[0]
+    prerelease = prerelease.split("+")[0]
+    numbers = [int(p) if p.isdigit() else 0 for p in core.split(".")]
+    numbers += [0] * (4 - len(numbers))
+    if not prerelease:
+        # A release outranks every prerelease of the same core version.
+        return (numbers, 1, [])
+    identifiers = [
+        (0, int(i), "") if i.isdigit() else (1, 0, i)
+        for i in prerelease.split(".")
+    ]
+    return (numbers, 0, identifiers)
+
+
 def discover_version():
-    result = subprocess.run(
-        ["dotnet", "package", "search", "Jellyfin.Controller",
-         "--source", NUGET_SOURCE_NAME,
-         "--prerelease", "--take", "1", "--format", "json"],
-        capture_output=True, text=True, check=True,
+    package_id = "Jellyfin.Controller"
+    token = _feed_token()
+    index = _feed_get(NUGET_SOURCE_URL, token)
+    base_address = next(
+        (r["@id"] for r in index.get("resources", [])
+         if r.get("@type", "").startswith("PackageBaseAddress")),
+        None,
     )
-    data = json.loads(result.stdout)
-    packages = data["searchResult"][0]["packages"]
-    if not packages:
-        raise RuntimeError("Jellyfin.Controller not found in jellyfin-pre feed")
-    version = packages[0]["latestVersion"]
+    if not base_address:
+        raise RuntimeError(
+            f"{NUGET_SOURCE_NAME} feed exposes no PackageBaseAddress resource"
+        )
+    url = f"{base_address.rstrip('/')}/{package_id.lower()}/index.json"
+    versions = _feed_get(url, token).get("versions") or []
+    if not versions:
+        raise RuntimeError(f"{package_id} not found in {NUGET_SOURCE_NAME} feed")
+    version = max(versions, key=_version_key)
     parts = version.split(".")
-    return int(parts[0]), int(parts[1]), _get_tfm("Jellyfin.Controller", version)
+    return int(parts[0]), int(parts[1]), _get_tfm(package_id, version)
 
 
 def _get_tfm(package_id, version):
