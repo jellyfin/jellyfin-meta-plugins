@@ -80,7 +80,6 @@ def _feed_token():
 def _feed_get(url, token):
     request = urllib.request.Request(url, headers={"Accept": "application/json"})
     if token:
-        # GitHub Packages ignores the basic-auth username, only the token matters.
         credential = base64.b64encode(f"jellyfin-bot:{token}".encode()).decode()
         request.add_header("Authorization", f"Basic {credential}")
     try:
@@ -89,8 +88,14 @@ def _feed_get(url, token):
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8", "replace").strip()
         hint = ""
-        if e.code in (401, 403):
-            hint = "\nThe token is missing or lacks the 'read:packages' scope."
+        if e.code == 401:
+            hint = (
+                "\nThe feed rejected the credential outright. GitHub Packages accepts"
+                "\nonly a classic PAT (fine-grained tokens always 401 here), and it must"
+                "\nbe unexpired and SSO-authorized for the jellyfin org."
+            )
+        elif e.code == 403:
+            hint = "\nThe credential is valid but lacks the 'read:packages' scope."
         raise RuntimeError(
             f"GET {url} failed: HTTP {e.code} {e.reason}{hint}\n{body}"
         ) from None
@@ -105,7 +110,6 @@ def _version_key(version):
     numbers = [int(p) if p.isdigit() else 0 for p in core.split(".")]
     numbers += [0] * (4 - len(numbers))
     if not prerelease:
-        # A release outranks every prerelease of the same core version.
         return (numbers, 1, [])
     identifiers = [
         (0, int(i), "") if i.isdigit() else (1, 0, i)
@@ -189,15 +193,16 @@ def init_submodule(name):
     run(["git", "submodule", "update", "--init", name], cwd=REPO_ROOT)
 
 
+def owner_repo(plugin_dir):
+    return f"jellyfin/{plugin_dir.name}"
+
+
 def check_unstable(plugin_dir):
     run(["git", "fetch", "origin"], cwd=plugin_dir)
     branch_exists = bool(
         get_output(["git", "ls-remote", "--heads", "origin", UNSTABLE_BRANCH], cwd=plugin_dir)
     )
-    repo = get_output(
-        ["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"],
-        cwd=plugin_dir,
-    )
+    repo = owner_repo(plugin_dir)
     pr_url = get_output(
         ["gh", "pr", "list", "--repo", repo, "--head", UNSTABLE_BRANCH,
          "--state", "open", "--json", "url", "-q", ".[0].url // empty"],
@@ -332,10 +337,7 @@ def commit_push(plugin_dir, failing=False):
 
 
 def push_branch(plugin_dir):
-    # gh defaults to SSH; HTTPS pushes fail without credentials.
-    ssh_url = get_output(
-        ["gh", "repo", "view", "--json", "sshUrl", "-q", ".sshUrl"], cwd=plugin_dir
-    )
+    ssh_url = f"git@github.com:{owner_repo(plugin_dir)}.git"
     run(["git", "remote", "set-url", "origin", ssh_url], cwd=plugin_dir)
     run(["git", "push", "origin", UNSTABLE_BRANCH, "--force-with-lease"], cwd=plugin_dir)
 
@@ -382,8 +384,19 @@ def create_pr(plugin_dir, repo, new_major, errors=None):
     ], cwd=plugin_dir)
 
 
-def update_pr_body(plugin_dir, pr_url, body):
-    run(["gh", "pr", "edit", pr_url, "--body", body], cwd=plugin_dir)
+def _comment_body(new_major, errors=None, rebase_conflict=False, reason=None):
+    lines = []
+    if errors:
+        lines.append(_format_errors_section(errors).strip())
+    if rebase_conflict:
+        lines.append(_format_rebase_section(rebase_conflict).strip())
+    if reason:
+        lines.append(f"`{reason}`")
+    return "\n\n".join(lines)
+
+
+def comment_pr(plugin_dir, pr_url, body):
+    run(["gh", "pr", "comment", pr_url, "--body", body], cwd=plugin_dir)
 
 
 def process_plugin(plugin_dir, new_major, new_minor, tfm):
@@ -445,11 +458,10 @@ def process_plugin(plugin_dir, new_major, new_minor, tfm):
         print("  Pushing rebased branch...")
         push_branch(plugin_dir)
 
-    # Always rebuild the body so a clean run clears a previous run's warnings.
     if pr_url:
-        update_pr_body(
-            plugin_dir, pr_url, _build_pr_body(new_major, rebase_conflict=rebase_conflict)
-        )
+        if rebase_conflict:
+            print("  Commenting on rebase conflict...")
+            comment_pr(plugin_dir, pr_url, _comment_body(new_major, rebase_conflict=True))
         if committed:
             return "updated", pr_url
         return ("rebased" if rebased else "built"), pr_url
@@ -463,12 +475,13 @@ def process_plugin(plugin_dir, new_major, new_minor, tfm):
 
 
 def _push_failing(plugin_dir, repo, new_major, pr_url, errors, reason, rebase_conflict=False):
-    del reason  # commit_push(failing=True) always pushes (empty commit if needed)
     commit_push(plugin_dir, failing=True)
-    body = _build_pr_body(new_major, errors, rebase_conflict)
     if pr_url:
-        update_pr_body(plugin_dir, pr_url, body)
-        print(f"  Pushed [build-failing] commit to existing PR: {pr_url}")
+        comment_pr(
+            plugin_dir, pr_url,
+            _comment_body(new_major, errors=errors, reason=reason, rebase_conflict=rebase_conflict),
+        )
+        print(f"  Pushed [build-failing] commit and commented on existing PR: {pr_url}")
         return "pushed_failing", pr_url
     new_pr = create_pr(plugin_dir, repo, new_major, errors=errors)
     print(f"  Created [build-failing] PR: {new_pr}")
@@ -504,7 +517,7 @@ def main():
             status, detail = process_plugin(plugin_dir, new_major, new_minor, tfm)
         except subprocess.CalledProcessError as e:
             status, detail = "error", str(e)
-        except Exception as e:  # keep processing the remaining plugins
+        except Exception as e:
             traceback.print_exc()
             status, detail = "error", f"{type(e).__name__}: {e}"
         results[status].append((plugin_dir.name, detail))

@@ -5,6 +5,7 @@ Dependencies
 ------------
 
 - [hub](https://hub.github.com/)
+- [gh](https://cli.github.com/)
 - [jprm](https://pypi.org/project/jprm/) (building)
 - dotnet (building)
 - git
@@ -26,3 +27,5 @@ Tools
   Lists all open pull-requests on the plugin repositories.
 - `update_submodules.py`
   Updates sub-modules, adds new plugins from the org, and removes archived/moved ones.
+- `unstable_plugins.py`
+  Opens draft PRs moving each plugin's `unstable` branch to the latest Jellyfin prerelease.
