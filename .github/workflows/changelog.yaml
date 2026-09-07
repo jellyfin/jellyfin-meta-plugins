@@ -32,11 +32,13 @@ jobs:
           token: ${{ secrets.token }}
 
       - name: Set-up Environment
+        env:
+          TAG: ${{ steps.draft.outputs.tag_name }}
+          BODY: ${{ steps.draft.outputs.body }}
         run: |-
-          TAG="${{ steps.draft.outputs.tag_name }}"
           echo "VERSION=${TAG#v}" >> $GITHUB_ENV
           cat << EOF | grep -P '^([*-] |###)' > cl.md
-          ${{ steps.draft.outputs.body }}
+          ${BODY}
           EOF
           sed -i -r 's/^(#+) (:.*:)? *(.*)$/\n\1 \3 \1/' cl.md
           sed -i -r 's/^\*/-/' cl.md
