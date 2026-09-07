@@ -23,7 +23,7 @@ MAX_FIX_ITERATIONS = 10
 IS_CI = os.environ.get("CI", "").lower() == "true"
 ERROR_LOG_MAX_LINES = 200
 
-REBASE_CONFLICTS = []
+MERGE_CONFLICTS = []
 
 _RE_JELLYFIN_PKG = re.compile(
     r'(PackageReference\s[^>]*Include="Jellyfin\.[^"]*"[^>]*Version=")(\d+)\.\*-\*(")'
@@ -211,14 +211,14 @@ def check_unstable(plugin_dir):
     return branch_exists, pr_url, repo
 
 
-def rebase_onto_master(plugin_dir):
+def merge_master(plugin_dir):
     result = subprocess.run(
-        ["git", "rebase", "origin/master"], cwd=plugin_dir, capture_output=True, text=True
+        ["git", "merge", "origin/master"], cwd=plugin_dir, capture_output=True, text=True
     )
     if result.returncode == 0:
         return True
     print(result.stdout + result.stderr, file=sys.stderr)
-    run(["git", "rebase", "--abort"], cwd=plugin_dir, check=False)
+    run(["git", "merge", "--abort"], cwd=plugin_dir, check=False)
     return False
 
 
@@ -354,20 +354,20 @@ def _format_errors_section(errors):
     return f"\n\n## Build errors{note}\n\n```\n{body}\n```\n"
 
 
-def _format_rebase_section(rebase_conflict):
-    if not rebase_conflict:
+def _format_merge_section(merge_conflict):
+    if not merge_conflict:
         return ""
     return (
-        "\n\n## Rebase conflict\n\n"
-        "Rebasing this branch onto `master` failed with conflicts, so it is still "
-        "based on an older `master`. Resolve the conflicts and rebase manually.\n"
+        "\n\n## Merge conflict\n\n"
+        "Merging `master` into this branch failed with conflicts, so it is still "
+        "based on an older `master`. Resolve the conflicts and update the branch manually.\n"
     )
 
 
-def _build_pr_body(new_major, errors=None, rebase_conflict=False):
+def _build_pr_body(new_major, errors=None, merge_conflict=False):
     return (
         f"Update Jellyfin NuGet package version to `{new_major}.*-*`."
-        + _format_rebase_section(rebase_conflict)
+        + _format_merge_section(merge_conflict)
         + _format_errors_section(errors)
     )
 
@@ -384,12 +384,12 @@ def create_pr(plugin_dir, repo, new_major, errors=None):
     ], cwd=plugin_dir)
 
 
-def _comment_body(new_major, errors=None, rebase_conflict=False, reason=None):
+def _comment_body(new_major, errors=None, merge_conflict=False, reason=None):
     lines = []
     if errors:
         lines.append(_format_errors_section(errors).strip())
-    if rebase_conflict:
-        lines.append(_format_rebase_section(rebase_conflict).strip())
+    if merge_conflict:
+        lines.append(_format_merge_section(merge_conflict).strip())
     if reason:
         lines.append(f"`{reason}`")
     return "\n\n".join(lines)
@@ -405,19 +405,19 @@ def process_plugin(plugin_dir, new_major, new_minor, tfm):
 
     init_submodule(name)
     branch_exists, pr_url, repo = check_unstable(plugin_dir)
-    rebase_conflict = False
-    rebased = False
+    merge_conflict = False
+    merged = False
 
     if branch_exists and pr_url:
         print(f"  Updating existing PR: {pr_url}")
         run(["git", "checkout", "-f", "-B", UNSTABLE_BRANCH, f"origin/{UNSTABLE_BRANCH}"], cwd=plugin_dir)
-        print("  Rebasing onto master...")
-        if rebase_onto_master(plugin_dir):
-            rebased = branch_moved(plugin_dir)
+        print("  Merging master...")
+        if merge_master(plugin_dir):
+            merged = branch_moved(plugin_dir)
         else:
-            print("  Rebase conflicted; continuing without rebasing", file=sys.stderr)
-            REBASE_CONFLICTS.append(name)
-            rebase_conflict = True
+            print("  Merge conflicted; continuing without merging", file=sys.stderr)
+            MERGE_CONFLICTS.append(name)
+            merge_conflict = True
     else:
         if branch_exists:
             print("  Deleting stale unstable branch")
@@ -438,7 +438,7 @@ def process_plugin(plugin_dir, new_major, new_minor, tfm):
         print(errors, file=sys.stderr)
         if IS_CI:
             return _push_failing(
-                plugin_dir, repo, new_major, pr_url, errors, "restore failed", rebase_conflict
+                plugin_dir, repo, new_major, pr_url, errors, "restore failed", merge_conflict
             )
         return "error", "restore failed"
 
@@ -448,23 +448,23 @@ def process_plugin(plugin_dir, new_major, new_minor, tfm):
         print(errors, file=sys.stderr)
         if IS_CI:
             return _push_failing(
-                plugin_dir, repo, new_major, pr_url, errors, "build failed", rebase_conflict
+                plugin_dir, repo, new_major, pr_url, errors, "build failed", merge_conflict
             )
         return "error", "build failed"
     print("  Build succeeded.")
 
     committed = commit_push(plugin_dir)
-    if not committed and rebased:
-        print("  Pushing rebased branch...")
+    if not committed and merged:
+        print("  Pushing merged branch...")
         push_branch(plugin_dir)
 
     if pr_url:
-        if rebase_conflict:
-            print("  Commenting on rebase conflict...")
-            comment_pr(plugin_dir, pr_url, _comment_body(new_major, rebase_conflict=True))
+        if merge_conflict:
+            print("  Commenting on merge conflict...")
+            comment_pr(plugin_dir, pr_url, _comment_body(new_major, merge_conflict=True))
         if committed:
             return "updated", pr_url
-        return ("rebased" if rebased else "built"), pr_url
+        return ("merged" if merged else "built"), pr_url
 
     if not committed:
         return "built", None
@@ -474,12 +474,12 @@ def process_plugin(plugin_dir, new_major, new_minor, tfm):
     return "created", new_pr
 
 
-def _push_failing(plugin_dir, repo, new_major, pr_url, errors, reason, rebase_conflict=False):
+def _push_failing(plugin_dir, repo, new_major, pr_url, errors, reason, merge_conflict=False):
     commit_push(plugin_dir, failing=True)
     if pr_url:
         comment_pr(
             plugin_dir, pr_url,
-            _comment_body(new_major, errors=errors, reason=reason, rebase_conflict=rebase_conflict),
+            _comment_body(new_major, errors=errors, reason=reason, merge_conflict=merge_conflict),
         )
         print(f"  Pushed [build-failing] commit and commented on existing PR: {pr_url}")
         return "pushed_failing", pr_url
@@ -509,7 +509,7 @@ def main():
     print(f"Target Jellyfin version: {new_major}.{new_minor} ({tfm})")
 
     results = {
-        "created": [], "updated": [], "rebased": [], "built": [], "pushed_failing": [], "error": []
+        "created": [], "updated": [], "merged": [], "built": [], "pushed_failing": [], "error": []
     }
 
     for plugin_dir in plugins:
@@ -526,7 +526,7 @@ def main():
     for label, key in [
         ("PRs created", "created"),
         ("PRs updated", "updated"),
-        ("Rebased onto master (no other changes)", "rebased"),
+        ("Merged master (no other changes)", "merged"),
         ("Built (no changes)", "built"),
         ("Pushed with failing build", "pushed_failing"),
         ("Errors", "error"),
@@ -536,9 +536,9 @@ def main():
             for name, detail in results[key]:
                 print(f"  {name}" + (f": {detail}" if detail else ""))
 
-    if REBASE_CONFLICTS:
-        print("\nRebase onto master conflicted (resolve manually):")
-        for name in REBASE_CONFLICTS:
+    if MERGE_CONFLICTS:
+        print("\nMerge of master conflicted (resolve manually):")
+        for name in MERGE_CONFLICTS:
             print(f"  {name}")
 
 
